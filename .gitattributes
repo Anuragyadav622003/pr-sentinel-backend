@@ -1,0 +1,12 @@
+# Enforce LF for TypeScript source files
+*.ts text eol=lf
+*.tsx text eol=lf
+
+# Treat PEM files as binary to prevent line-ending conversion
+*.pem binary
+
+# Preserve text behavior for common text files
+*.md text
+*.json text
+*.yaml text
+*.yml text
