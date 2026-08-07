@@ -1,35 +1,37 @@
-import { Body, Controller, Headers, HttpCode, Post, Logger } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Headers,
+  HttpCode,
+  Post,
+  Req,
+} from '@nestjs/common';
+import { Request } from 'express';
+import { WebhookService } from './webhook.service';
+import { SignatureService } from './signature.service';
 
 @Controller('webhook')
 export class WebhookController {
-  private readonly logger = new Logger(WebhookController.name);
+  constructor(
+    private readonly webhookService: WebhookService,
+    private readonly signatureService: SignatureService,
+  ) {}
+
   @Post('github')
   @HttpCode(200)
-  githubWebhook(
-    @Body() body: any,
+  async githubWebhook(
+    @Req() req: Request & { rawBody: Buffer },
+    @Body() payload: any,
     @Headers() headers: Record<string, string>,
   ) {
-    this.logger.log('=========== GITHUB WEBHOOK ===========');
-    const event = headers['x-github-event'];
-    const delivery = headers['x-github-delivery'];
-    const action = body?.action;
-    const repository = body?.repository?.full_name;
+    this.signatureService.verifySignature(
+      headers['x-hub-signature-256'],
+      req.rawBody,
+    );
 
-    this.logger.log(`Event: ${event}`);
-    this.logger.log(`Delivery: ${delivery}`);
-    if (action) this.logger.log(`Action: ${action}`);
-    if (repository) this.logger.log(`Repository: ${repository}`);
-
-    if (!event) {
-      this.logger.warn('Missing x-github-event header');
-    }
-
-    return {
-      message: 'Webhook received',
-      event: event || null,
-      delivery: delivery || null,
-      repository: repository || null,
-      action: action || null,
-    };
+    return this.webhookService.handleGithubWebhook(
+      payload,
+      headers,
+    );
   }
 }

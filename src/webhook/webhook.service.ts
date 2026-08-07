@@ -2,11 +2,16 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
+import { GithubService } from '../github/github.service';
 
 @Injectable()
 export class WebhookService {
   private readonly logger =
     new Logger(WebhookService.name);
+
+  constructor(
+    private readonly githubService: GithubService,
+  ) {}
 
   async handleGithubWebhook(
     payload: any,
@@ -47,7 +52,7 @@ export class WebhookService {
 
     this.logger.log(`Repository : ${repository}`);
 
-    // If this is a pull_request event, extract PR details for easier consumption
+    let changedFiles: any[] | null = null;
     if (payload.pull_request) {
       const pr = payload.pull_request;
       this.logger.log(`PR# : ${pr.number}`);
@@ -55,13 +60,38 @@ export class WebhookService {
       this.logger.log(`PR Author : ${pr.user?.login}`);
       this.logger.log(`PR Head : ${pr.head?.ref}`);
       this.logger.log(`PR Base : ${pr.base?.ref}`);
+
+      const installationId = payload.installation?.id;
+      const owner = payload.repository?.owner?.login || payload.pull_request?.base?.repo?.owner?.login;
+      const repo = payload.repository?.name || payload.pull_request?.base?.repo?.name;
+      const pullNumber = pr.number;
+
+      if (installationId && owner && repo) {
+        try {
+          const token = await this.githubService.getInstallationToken(installationId);
+          changedFiles = await this.githubService.getPullRequestFiles(
+            owner,
+            repo,
+            pullNumber,
+            token,
+          );
+          if (changedFiles) {
+            this.logger.log(`Pull request changed files count: ${changedFiles.length}`);
+          }
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : String(error);
+          this.logger.warn(`Unable to fetch PR files: ${message}`);
+        }
+      } else {
+        this.logger.warn('Missing installation, owner, or repo info for fetching PR files');
+      }
     }
 
     this.logger.log(`Delivery : ${delivery}`);
 
     return {
       success: true,
-      repository,
+      repository, 
       action,
       event,
       pr: payload.pull_request ? {
@@ -72,6 +102,7 @@ export class WebhookService {
         base: payload.pull_request.base?.ref,
         url: payload.pull_request.html_url,
       } : null,
+      changedFiles,
     };
   }
 }
