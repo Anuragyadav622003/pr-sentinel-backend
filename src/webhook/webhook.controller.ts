@@ -13,7 +13,7 @@ export class WebhookController {
     console.log('Delivery:', headers['x-github-delivery']);
     console.log('Action:', body.action);
     console.log('Repository:', body.repository?.full_name);
-    console.log("hello")
+    console.log("hello world");
     return {
       message: 'Webhook received',
     };
