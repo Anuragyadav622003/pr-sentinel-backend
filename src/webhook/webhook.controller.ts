@@ -9,7 +9,7 @@ export class WebhookController {
     @Body() body: any,
     @Headers() headers: Record<string, string>,
   ) {
-    this.logger.log('=========== *GITHUB WEBHOOK ===========');
+    this.logger.log('=========== GITHUB WEBHOOK ===========');
     const event = headers['x-github-event'];
     const delivery = headers['x-github-delivery'];
     const action = body?.action;
