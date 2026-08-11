@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+enum PullRequestStatus {
+  RECEIVED
+  PROCESSING
+  REVIEWED
+  FAILED
+}
+
+enum FileStatus {
+  ADDED
+  MODIFIED
+  REMOVED
+  RENAMED
+}
+
+enum ReviewStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum Severity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model User {
+  id            String   @id @default(uuid())
+  githubId      String?  @unique
+  githubLogin   String?
+  email         String?  @unique
+  password      String?
+  avatarUrl     String?
+
+  installations Installation[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Installation {
+  id                   String   @id @default(uuid())
+  githubInstallationId Int      @unique
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  repositories Repository[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Repository {
+  id           String  @id @default(uuid())
+  githubRepoId Int     @unique
+  owner        String
+  name         String
+  fullName     String
+  isActive     Boolean @default(true)
+
+  installationId String
+  installation   Installation @relation(fields: [installationId], references: [id], onDelete: Cascade)
+
+  pullRequests PullRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([installationId])
+}
+
+model PullRequest {
+  id             String @id @default(uuid())
+  githubPrId     Int    @unique
+  githubPrNumber Int
+
+  title  String
+  author String
+
+  baseBranch String
+  headBranch String
+
+  status       PullRequestStatus @default(RECEIVED)
+  errorMessage String?
+
+  // dedupe: last processed GitHub webhook delivery ID
+  lastDeliveryId String?
+
+  repositoryId String
+  repository   Repository @relation(fields: [repositoryId], references: [id], onDelete: Cascade)
+
+  files   PrFile[]
+  reviews Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([repositoryId])
+}
+
+model PrFile {
+  id        String     @id @default(uuid())
+  filename  String
+  status    FileStatus
+  patch     String?
+  additions Int
+  deletions Int
+  changes   Int
+
+  pullRequestId String
+  pullRequest   PullRequest @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([pullRequestId])
+}
+
+model Review {
+  id       String       @id @default(uuid())
+  provider String       // "claude" | "openai" etc
+  summary  String?      @db.Text
+  status   ReviewStatus @default(PENDING)
+  errorMessage String?
+
+  pullRequestId String
+  pullRequest   PullRequest @relation(fields: [pullRequestId], references: [id], onDelete: Cascade)
+
+  comments ReviewComment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([pullRequestId])
+}
+
+model ReviewComment {
+  id         String    @id @default(uuid())
+  filePath   String
+  lineNumber Int?
+  severity   Severity?
+  category   String?   // "sql_injection" | "error_handling" | "n_plus_one" etc
+  message    String    @db.Text
+
+  // idempotency for posting to GitHub
+  postedToGithub Boolean @default(false)
+  githubCommentId BigInt?
+
+  reviewId String
+  review   Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([reviewId])
+}

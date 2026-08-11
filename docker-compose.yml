@@ -1,0 +1,51 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: pr-sentinel-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pr_sentinel
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - pr-network
+
+  redis:
+    image: redis:7
+    container_name: pr-sentinel-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - pr-network
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: pr-sentinel-redisinsight
+    restart: unless-stopped
+    ports:
+      - "5540:5540"
+    depends_on:
+      - redis
+    volumes:
+      - redisinsight_data:/data
+    networks:
+      - pr-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  redisinsight_data:
+
+networks:
+  pr-network:
+    driver: bridge
