@@ -101,7 +101,7 @@ async function verifyAndSync(
     connected: true,
     installation: {
       id: installation.id,
-      githubInstallationId: installation.githubInstallationId,
+      githubInstallationId: Number(installation.githubInstallationId),
       userId: installation.userId,
       accountLogin: installation.accountLogin ?? null,
       accountAvatarUrl: installation.accountAvatarUrl ?? null,
@@ -326,7 +326,7 @@ export class GithubController {
       connected: !isSuspended(installation),
       installation: {
         id: installation.id,
-        githubInstallationId: installation.githubInstallationId,
+        githubInstallationId: Number(installation.githubInstallationId),
         userId: installation.userId,
         accountLogin: installation.accountLogin ?? null,
         accountAvatarUrl: installation.accountAvatarUrl ?? null,
@@ -337,7 +337,7 @@ export class GithubController {
       repositoryCount: installation._count.repositories,
       repositories: repos.map((r) => ({
         id: r.id,
-        githubRepoId: r.githubRepoId,
+        githubRepoId: Number(r.githubRepoId),
         owner: r.owner,
         name: r.name,
         fullName: r.fullName,
@@ -379,7 +379,7 @@ export class GithubController {
       );
     }
 
-    const { githubInstallationId } = installation;
+    const githubInstallationId = Number(installation.githubInstallationId);
     this.logger.log(`Sync requested: user=${userId} githubInstallationId=${githubInstallationId}`);
 
     let githubRepos: Awaited<ReturnType<GithubService['listInstallationRepositories']>>;
@@ -414,7 +414,7 @@ export class GithubController {
       deactivated: syncResult.deactivated,
       repositories: repos.map((r) => ({
         id: r.id,
-        githubRepoId: r.githubRepoId,
+        githubRepoId: Number(r.githubRepoId),
         owner: r.owner,
         name: r.name,
         fullName: r.fullName,
@@ -439,7 +439,7 @@ export class GithubController {
       connected: !isSuspended(installation),
       installation: {
         id: installation.id,
-        githubInstallationId: installation.githubInstallationId,
+        githubInstallationId: Number(installation.githubInstallationId),
         userId: installation.userId,
         accountLogin: installation.accountLogin ?? null,
         accountAvatarUrl: installation.accountAvatarUrl ?? null,
@@ -464,7 +464,7 @@ export class GithubController {
     const repos = await this.repositoryService.findActiveReposByUserId(userId);
     return repos.map((r) => ({
       id: r.id,
-      githubRepoId: r.githubRepoId,
+      githubRepoId: Number(r.githubRepoId),
       owner: r.owner,
       name: r.name,
       fullName: r.fullName,

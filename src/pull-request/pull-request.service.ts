@@ -48,9 +48,11 @@ export class PullRequestService {
     action: PullRequestTriggerAction,
     deliveryId: string,
   ) {
+    const githubPrId = BigInt(pr.id);
+
     // Deduplicate: if we already processed this exact delivery, skip.
     const existing = await this.prisma.pullRequest.findUnique({
-      where: { githubPrId: pr.id },
+      where: { githubPrId },
     });
 
     if (existing?.lastDeliveryId === deliveryId) {
@@ -75,8 +77,8 @@ export class PullRequestService {
 
     if (action === 'opened' || !existing) {
       pullRequest = await this.prisma.pullRequest.upsert({
-        where: { githubPrId: pr.id },
-        create: { githubPrId: pr.id, ...data },
+        where: { githubPrId },
+        create: { githubPrId, ...data },
         update: { ...data, updatedAt: new Date() },
       });
       this.logger.log(
@@ -85,7 +87,7 @@ export class PullRequestService {
     } else {
       // synchronize / reopened — update the existing record
       pullRequest = await this.prisma.pullRequest.update({
-        where: { githubPrId: pr.id },
+        where: { githubPrId },
         data: {
           title: pr.title,
           headBranch: pr.head.ref,
@@ -164,9 +166,9 @@ export class PullRequestService {
 
   // ─── Queries ───────────────────────────────────────────────────────────────
 
-  async findByGithubPrId(githubPrId: number) {
+  async findByGithubPrId(githubPrId: number | bigint) {
     return this.prisma.pullRequest.findUnique({
-      where: { githubPrId },
+      where: { githubPrId: BigInt(githubPrId) },
       include: { files: true, reviews: true },
     });
   }
