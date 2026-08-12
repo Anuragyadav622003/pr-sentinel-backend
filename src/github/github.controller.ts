@@ -155,8 +155,9 @@ export class GithubController {
   // App page, GitHub redirects to the Setup URL without state.
   //
   // Security model:
-  //   • With state    → validate Redis token, confirm JWT user matches.
-  //   • Without state → allow only if installation is unclaimed OR already
+  //   • With a live state → validate Redis token, confirm JWT user matches.
+  //   • Without a usable state (absent, expired or already consumed) → allow
+  //                     only if installation is unclaimed OR already
   //                     owned by the JWT user (no CSRF risk because the JWT
   //                     cookie proves identity).
 
@@ -165,7 +166,7 @@ export class GithubController {
     @Req() req: AuthedRequest,
     @Query('installation_id') rawInstallationId?: string,
     @Query('state') state?: string,
-    @Query('setup_action') _setupAction?: string,
+    @Query('setup_action') setupAction?: string,
   ): Promise<GitHubInstallationStatus> {
     // installation_id is always required
     if (!rawInstallationId) {
@@ -179,18 +180,18 @@ export class GithubController {
       throw new BadRequestException('installation_id must be a positive integer.');
     }
 
+    // State tokens are single-use, so a reload of the setup URL, a
+    // `setup_action=update` redirect or a replayed link arrives with a state
+    // that no longer resolves. Treat that exactly like the no-state path
+    // instead of failing the whole install.
+    const stateUserId = state
+      ? await this.installStateService.consume(state)
+      : null;
+
     let verifiedUserId: string;
 
-    if (state) {
+    if (stateUserId) {
       // ── Full state-validated path (new installation) ───────────────────
-      const stateUserId = await this.installStateService.consume(state);
-      if (!stateUserId) {
-        throw new UnauthorizedException(
-          'This GitHub connection request has expired or has already been used. ' +
-            'Please start the connection flow again.',
-        );
-      }
-
       if (req.user.id !== stateUserId) {
         this.logger.warn(
           `State userId mismatch: jwt=${req.user.id} state=${stateUserId}`,
@@ -205,7 +206,7 @@ export class GithubController {
         `completeInstall (with state): githubInstallationId=${githubInstallationId} user=${verifiedUserId}`,
       );
     } else {
-      // ── No-state path (app already installed, GitHub omits state) ──────
+      // ── No-state path (app already installed, or state already used) ───
       // Safe because the JWT cookie already proves identity. We only allow
       // this when the installation is unclaimed or already belongs to this user.
       const existing = await this.repositoryService.findInstallationByGithubId(
@@ -224,7 +225,7 @@ export class GithubController {
 
       verifiedUserId = req.user.id;
       this.logger.log(
-        `completeInstall (no state, app already installed): ` +
+        `completeInstall (no usable state, setup_action=${setupAction ?? 'none'}): ` +
           `githubInstallationId=${githubInstallationId} user=${verifiedUserId}`,
       );
     }
