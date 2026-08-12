@@ -378,9 +378,9 @@ export type UserMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
-export type UserScalarRelationFilter = {
-  is?: Prisma.UserWhereInput
-  isNot?: Prisma.UserWhereInput
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -401,10 +401,12 @@ export type UserCreateNestedOneWithoutInstallationsInput = {
   connect?: Prisma.UserWhereUniqueInput
 }
 
-export type UserUpdateOneRequiredWithoutInstallationsNestedInput = {
+export type UserUpdateOneWithoutInstallationsNestedInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutInstallationsInput, Prisma.UserUncheckedCreateWithoutInstallationsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutInstallationsInput
   upsert?: Prisma.UserUpsertWithoutInstallationsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
   connect?: Prisma.UserWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInstallationsInput, Prisma.UserUpdateWithoutInstallationsInput>, Prisma.UserUncheckedUpdateWithoutInstallationsInput>
 }

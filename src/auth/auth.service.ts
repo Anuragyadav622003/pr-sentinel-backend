@@ -7,9 +7,9 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
-import { randomBytes } from 'crypto';
 import { hash, compare } from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
+import { OAuthStateService } from './oauth-state.service';
 import type {
   AuthenticatedUser,
   GithubOAuthTokenResponse,
@@ -17,20 +17,16 @@ import type {
   JwtPayload,
 } from './auth.types';
 
-interface OAuthStatePayload {
-  redirect?: string;
-  nonce: string;
-}
-
 @Injectable()
 export class AuthService {
-  private readonly stateStore = new Map<string, OAuthStatePayload>();
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly oauthState: OAuthStateService,
   ) {}
+
+  // ─── OAuth state ──────────────────────────────────────────────────────────
 
   getGithubAuthorizeUrl(state: string): string {
     const clientId = this.getRequiredConfig('GITHUB_OAUTH_CLIENT_ID');
@@ -41,33 +37,26 @@ export class AuthService {
       scope: 'read:user user:email',
       state,
     });
-
     return `https://github.com/login/oauth/authorize?${params.toString()}`;
   }
 
-  createOAuthState(redirect?: string): string {
-    const nonce = randomBytes(16).toString('hex');
-    const state = randomBytes(24).toString('hex');
-    this.stateStore.set(state, { redirect, nonce });
-    return state;
+  /** Create a random OAuth state stored in Redis.  Returns the token. */
+  async createOAuthState(redirect?: string): Promise<string> {
+    return this.oauthState.create(redirect);
   }
 
-  consumeOAuthState(state: string): OAuthStatePayload {
-    const payload = this.stateStore.get(state);
-    this.stateStore.delete(state);
-
-    if (!payload) {
-      throw new UnauthorizedException('Invalid or expired OAuth state');
-    }
-
-    return payload;
-  }
+  // ─── OAuth callback ───────────────────────────────────────────────────────
 
   async handleGithubCallback(
     code: string,
     state: string,
   ): Promise<{ accessToken: string; user: AuthenticatedUser; redirect?: string }> {
-    const statePayload = this.consumeOAuthState(state);
+    // Consume the state — throws if missing/expired.
+    const statePayload = await this.oauthState.consume(state);
+    if (!statePayload) {
+      throw new UnauthorizedException('Invalid or expired OAuth state');
+    }
+
     const githubAccessToken = await this.exchangeCodeForToken(code);
     const githubProfile = await this.fetchGithubProfile(githubAccessToken);
     const user = await this.upsertGithubUser(githubProfile);
@@ -80,9 +69,16 @@ export class AuthService {
     };
   }
 
-  async registerLocalUser(email: string, password: string): Promise<{ accessToken: string; user: AuthenticatedUser }> {
+  // ─── Email / password ─────────────────────────────────────────────────────
+
+  async registerLocalUser(
+    email: string,
+    password: string,
+  ): Promise<{ accessToken: string; user: AuthenticatedUser }> {
     const normalizedEmail = email.trim().toLowerCase();
-    const existingUser = await this.prisma.user.findUnique({ where: { email: normalizedEmail } });
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
 
     if (existingUser) {
       throw new ConflictException('Email already registered');
@@ -90,10 +86,7 @@ export class AuthService {
 
     const hashedPassword = await this.hashPassword(password);
     const user = await this.prisma.user.create({
-      data: {
-        email: normalizedEmail,
-        password: hashedPassword,
-      },
+      data: { email: normalizedEmail, password: hashedPassword },
     });
 
     const authenticatedUser = this.toAuthenticatedUser(user);
@@ -103,9 +96,14 @@ export class AuthService {
     };
   }
 
-  async loginLocalUser(email: string, password: string): Promise<{ accessToken: string; user: AuthenticatedUser }> {
+  async loginLocalUser(
+    email: string,
+    password: string,
+  ): Promise<{ accessToken: string; user: AuthenticatedUser }> {
     const normalizedEmail = email.trim().toLowerCase();
-    const user = await this.prisma.user.findUnique({ where: { email: normalizedEmail } });
+    const user = await this.prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
 
     if (!user || !user.password) {
       throw new UnauthorizedException('Invalid credentials');
@@ -128,6 +126,19 @@ export class AuthService {
     return user ? this.toAuthenticatedUser(user) : null;
   }
 
+  // ─── Token helpers ────────────────────────────────────────────────────────
+
+  async createAccessToken(user: AuthenticatedUser): Promise<string> {
+    const payload: JwtPayload = {
+      sub: user.id,
+      githubId: user.githubId,
+      githubLogin: user.githubLogin,
+    };
+    return this.jwtService.signAsync(payload);
+  }
+
+  // ─── Private helpers ──────────────────────────────────────────────────────
+
   private async exchangeCodeForToken(code: string): Promise<string> {
     const clientId = this.getRequiredConfig('GITHUB_OAUTH_CLIENT_ID');
     const clientSecret = this.getRequiredConfig('GITHUB_OAUTH_CLIENT_SECRET');
@@ -136,17 +147,8 @@ export class AuthService {
     try {
       const response = await axios.post<GithubOAuthTokenResponse>(
         'https://github.com/login/oauth/access_token',
-        {
-          client_id: clientId,
-          client_secret: clientSecret,
-          code,
-          redirect_uri: redirectUri,
-        },
-        {
-          headers: {
-            Accept: 'application/json',
-          },
-        },
+        { client_id: clientId, client_secret: clientSecret, code, redirect_uri: redirectUri },
+        { headers: { Accept: 'application/json' } },
       );
 
       if (!response.data.access_token) {
@@ -164,22 +166,25 @@ export class AuthService {
 
   private async fetchGithubProfile(accessToken: string): Promise<GithubUserProfile> {
     try {
-      const response = await axios.get<GithubUserProfile>('https://api.github.com/user', {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          Accept: 'application/vnd.github+json',
+      const response = await axios.get<GithubUserProfile>(
+        'https://api.github.com/user',
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            Accept: 'application/vnd.github+json',
+          },
         },
-      });
-
+      );
       return response.data;
     } catch {
       throw new UnauthorizedException('Failed to fetch GitHub user profile');
     }
   }
 
-  private async upsertGithubUser(profile: GithubUserProfile): Promise<AuthenticatedUser> {
+  private async upsertGithubUser(
+    profile: GithubUserProfile,
+  ): Promise<AuthenticatedUser> {
     const githubId = String(profile.id);
-
     const user = await this.prisma.user.upsert({
       where: { githubId },
       create: {
@@ -194,25 +199,17 @@ export class AuthService {
         avatarUrl: profile.avatar_url,
       },
     });
-
     return this.toAuthenticatedUser(user);
-  }
-
-  async createAccessToken(user: AuthenticatedUser): Promise<string> {
-    const payload: JwtPayload = {
-      sub: user.id,
-      githubId: user.githubId,
-      githubLogin: user.githubLogin,
-    };
-
-    return this.jwtService.signAsync(payload);
   }
 
   private async hashPassword(password: string): Promise<string> {
     return hash(password, 12);
   }
 
-  private async comparePassword(password: string, hashedPassword: string): Promise<boolean> {
+  private async comparePassword(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
     return compare(password, hashedPassword);
   }
 

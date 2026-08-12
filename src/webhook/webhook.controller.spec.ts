@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { WebhookController } from './webhook.controller';
 import { WebhookService } from './webhook.service';
 import { SignatureService } from './signature.service';
+import type { RawWebhookHeaders } from './types/github-webhook.types';
 
 describe('WebhookController', () => {
   let controller: WebhookController;
@@ -14,7 +15,9 @@ describe('WebhookController', () => {
       providers: [
         {
           provide: WebhookService,
-          useValue: { handleGithubWebhook: jest.fn().mockResolvedValue({ success: true }) },
+          useValue: {
+            handleGithubWebhook: jest.fn().mockResolvedValue({ success: true }),
+          },
         },
         {
           provide: SignatureService,
@@ -32,13 +35,18 @@ describe('WebhookController', () => {
     expect(controller).toBeDefined();
   });
 
-  it('should return webhook info when called', async () => {
-    const body = { action: 'opened', repository: { full_name: 'owner/repo' } } as any;
-    const headers = {
+  it('should verify signature and delegate to WebhookService', async () => {
+    const body = {
+      action: 'opened',
+      repository: { full_name: 'owner/repo' },
+    } as any;
+
+    // Use the correct RawWebhookHeaders type so TypeScript is satisfied.
+    const headers: RawWebhookHeaders = {
       'x-github-event': 'pull_request',
       'x-github-delivery': 'delivery-id-123',
-      'x-hub-signature-256': 'sha256=invalid',
-    } as Record<string, string>;
+      'x-hub-signature-256': 'sha256=abc',
+    };
 
     const res = await controller.githubWebhook(
       { rawBody: Buffer.from(JSON.stringify(body)) } as any,
@@ -50,7 +58,10 @@ describe('WebhookController', () => {
       headers['x-hub-signature-256'],
       expect.any(Buffer),
     );
-    expect(webhookService.handleGithubWebhook).toHaveBeenCalledWith(body, headers);
+    expect(webhookService.handleGithubWebhook).toHaveBeenCalledWith(
+      body,
+      headers,
+    );
     expect(res).toEqual({ success: true });
   });
 });

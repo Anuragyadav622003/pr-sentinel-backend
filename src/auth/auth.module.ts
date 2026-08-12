@@ -5,6 +5,8 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
+import { OAuthStateService } from './oauth-state.service';
+import { RedisService } from 'src/shared/redis/redis.service';
 
 @Module({
   imports: [
@@ -14,21 +16,16 @@ import { JwtStrategy } from './jwt.strategy';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         const secret = configService.get<string>('JWT_SECRET');
-        if (!secret) {
-          throw new Error('JWT_SECRET is not configured');
-        }
-
+        if (!secret) throw new Error('JWT_SECRET is not configured');
         return {
           secret,
-          signOptions: {
-            expiresIn: 60 * 60 * 24 * 7,
-          },
+          signOptions: { expiresIn: 60 * 60 * 24 * 7 }, // 7 days
         };
       },
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, OAuthStateService, RedisService],
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

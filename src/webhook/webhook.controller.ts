@@ -9,6 +9,7 @@ import {
 import { Request } from 'express';
 import { WebhookService } from './webhook.service';
 import { SignatureService } from './signature.service';
+import { RawWebhookHeaders } from './types/github-webhook.types';
 
 @Controller('webhook')
 export class WebhookController {
@@ -22,7 +23,7 @@ export class WebhookController {
   async githubWebhook(
     @Req() req: Request & { rawBody: Buffer },
     @Body() payload: any,
-    @Headers() headers: Record<string, string>,
+    @Headers() headers: RawWebhookHeaders,
   ) {
     this.signatureService.verifySignature(
       headers['x-hub-signature-256'],

@@ -997,6 +997,9 @@ export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof User
 export const InstallationScalarFieldEnum = {
   id: 'id',
   githubInstallationId: 'githubInstallationId',
+  accountLogin: 'accountLogin',
+  accountAvatarUrl: 'accountAvatarUrl',
+  suspended: 'suspended',
   userId: 'userId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1011,6 +1014,7 @@ export const RepositoryScalarFieldEnum = {
   owner: 'owner',
   name: 'name',
   fullName: 'fullName',
+  htmlUrl: 'htmlUrl',
   isActive: 'isActive',
   installationId: 'installationId',
   createdAt: 'createdAt',

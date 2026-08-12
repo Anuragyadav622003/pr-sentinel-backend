@@ -53,8 +53,16 @@ model Installation {
   id                   String   @id @default(uuid())
   githubInstallationId Int      @unique
 
-  userId String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // GitHub account that owns the installation (user or org)
+  accountLogin         String?
+  accountAvatarUrl     String?
+
+  // True while GitHub has suspended the installation.
+  // Suspended installations must not process new pull requests.
+  suspended            Boolean  @default(false)
+
+  userId String?
+  user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   repositories Repository[]
 
@@ -70,6 +78,7 @@ model Repository {
   owner        String
   name         String
   fullName     String
+  htmlUrl      String?
   isActive     Boolean @default(true)
 
   installationId String

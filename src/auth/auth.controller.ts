@@ -23,16 +23,27 @@ export class AuthController {
 
   // ─── GitHub OAuth ──────────────────────────────────────────────────────────
 
+  /**
+   * GET /api/auth/github
+   * Entry point for GitHub OAuth login.  Generates a secure random state
+   * (stored in Redis), builds the GitHub authorize URL, and redirects.
+   */
   @Get('github')
-  githubLogin(
+  async githubLogin(
     @Query('redirect') redirect: string | undefined,
     @Res() res: Response,
-  ): void {
-    const state = this.authService.createOAuthState(redirect);
+  ): Promise<void> {
+    const state = await this.authService.createOAuthState(redirect);
     const authorizeUrl = this.authService.getGithubAuthorizeUrl(state);
     res.redirect(authorizeUrl);
   }
 
+  /**
+   * GET /api/auth/github/callback
+   * GitHub redirects here after the user authorises the OAuth app.
+   * Validates state, exchanges the code, upserts the user, sets the JWT
+   * cookie, then redirects to the frontend callback page.
+   */
   @Get('github/callback')
   async githubCallback(
     @Query('code') code: string | undefined,
@@ -63,14 +74,14 @@ export class AuthController {
 
   /**
    * POST /api/auth/register
-   * Body: { email, password }
-   * Returns: { user: AuthenticatedUser }
-   * (wrapped by ResponseFormatInterceptor → { success, data: { user }, ... })
+   * Creates a new local account, sets the JWT cookie, returns the user.
    */
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  async register(@Body() dto: RegisterDto, @Res({ passthrough: true }) res: Response) {
-    
+  async register(
+    @Body() dto: RegisterDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const result = await this.authService.registerLocalUser(dto.email, dto.password);
     this.setAccessTokenCookie(res, result.accessToken);
     return { user: result.user };
@@ -78,12 +89,14 @@ export class AuthController {
 
   /**
    * POST /api/auth/login
-   * Body: { email, password }
-   * Returns: { user: AuthenticatedUser }
+   * Signs in with email + password, sets the JWT cookie, returns the user.
    */
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const result = await this.authService.loginLocalUser(dto.email, dto.password);
     this.setAccessTokenCookie(res, result.accessToken);
     return { user: result.user };
@@ -93,7 +106,7 @@ export class AuthController {
 
   /**
    * GET /api/auth/me
-   * Returns the currently authenticated user from the JWT cookie.
+   * Returns the currently authenticated user (from the JWT cookie).
    */
   @Get('me')
   @UseGuards(JwtAuthGuard)
@@ -108,13 +121,17 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('accessToken', { httpOnly: true, sameSite: 'lax' });
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    });
     return { message: 'Logged out successfully' };
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────────
 
-  private setAccessTokenCookie(res: Response, accessToken: string) {
+  private setAccessTokenCookie(res: Response, accessToken: string): void {
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

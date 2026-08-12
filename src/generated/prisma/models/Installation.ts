@@ -37,6 +37,9 @@ export type InstallationSumAggregateOutputType = {
 export type InstallationMinAggregateOutputType = {
   id: string | null
   githubInstallationId: number | null
+  accountLogin: string | null
+  accountAvatarUrl: string | null
+  suspended: boolean | null
   userId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -45,6 +48,9 @@ export type InstallationMinAggregateOutputType = {
 export type InstallationMaxAggregateOutputType = {
   id: string | null
   githubInstallationId: number | null
+  accountLogin: string | null
+  accountAvatarUrl: string | null
+  suspended: boolean | null
   userId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -53,6 +59,9 @@ export type InstallationMaxAggregateOutputType = {
 export type InstallationCountAggregateOutputType = {
   id: number
   githubInstallationId: number
+  accountLogin: number
+  accountAvatarUrl: number
+  suspended: number
   userId: number
   createdAt: number
   updatedAt: number
@@ -71,6 +80,9 @@ export type InstallationSumAggregateInputType = {
 export type InstallationMinAggregateInputType = {
   id?: true
   githubInstallationId?: true
+  accountLogin?: true
+  accountAvatarUrl?: true
+  suspended?: true
   userId?: true
   createdAt?: true
   updatedAt?: true
@@ -79,6 +91,9 @@ export type InstallationMinAggregateInputType = {
 export type InstallationMaxAggregateInputType = {
   id?: true
   githubInstallationId?: true
+  accountLogin?: true
+  accountAvatarUrl?: true
+  suspended?: true
   userId?: true
   createdAt?: true
   updatedAt?: true
@@ -87,6 +102,9 @@ export type InstallationMaxAggregateInputType = {
 export type InstallationCountAggregateInputType = {
   id?: true
   githubInstallationId?: true
+  accountLogin?: true
+  accountAvatarUrl?: true
+  suspended?: true
   userId?: true
   createdAt?: true
   updatedAt?: true
@@ -182,7 +200,10 @@ export type InstallationGroupByArgs<ExtArgs extends runtime.Types.Extensions.Int
 export type InstallationGroupByOutputType = {
   id: string
   githubInstallationId: number
-  userId: string
+  accountLogin: string | null
+  accountAvatarUrl: string | null
+  suspended: boolean
+  userId: string | null
   createdAt: Date
   updatedAt: Date
   _count: InstallationCountAggregateOutputType | null
@@ -213,17 +234,23 @@ export type InstallationWhereInput = {
   NOT?: Prisma.InstallationWhereInput | Prisma.InstallationWhereInput[]
   id?: Prisma.StringFilter<"Installation"> | string
   githubInstallationId?: Prisma.IntFilter<"Installation"> | number
-  userId?: Prisma.StringFilter<"Installation"> | string
+  accountLogin?: Prisma.StringNullableFilter<"Installation"> | string | null
+  accountAvatarUrl?: Prisma.StringNullableFilter<"Installation"> | string | null
+  suspended?: Prisma.BoolFilter<"Installation"> | boolean
+  userId?: Prisma.StringNullableFilter<"Installation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Installation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Installation"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   repositories?: Prisma.RepositoryListRelationFilter
 }
 
 export type InstallationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   githubInstallationId?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  accountLogin?: Prisma.SortOrderInput | Prisma.SortOrder
+  accountAvatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  suspended?: Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -236,17 +263,23 @@ export type InstallationWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.InstallationWhereInput | Prisma.InstallationWhereInput[]
   OR?: Prisma.InstallationWhereInput[]
   NOT?: Prisma.InstallationWhereInput | Prisma.InstallationWhereInput[]
-  userId?: Prisma.StringFilter<"Installation"> | string
+  accountLogin?: Prisma.StringNullableFilter<"Installation"> | string | null
+  accountAvatarUrl?: Prisma.StringNullableFilter<"Installation"> | string | null
+  suspended?: Prisma.BoolFilter<"Installation"> | boolean
+  userId?: Prisma.StringNullableFilter<"Installation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Installation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Installation"> | Date | string
-  user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   repositories?: Prisma.RepositoryListRelationFilter
 }, "id" | "githubInstallationId">
 
 export type InstallationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   githubInstallationId?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  accountLogin?: Prisma.SortOrderInput | Prisma.SortOrder
+  accountAvatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  suspended?: Prisma.SortOrder
+  userId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.InstallationCountOrderByAggregateInput
@@ -262,7 +295,10 @@ export type InstallationScalarWhereWithAggregatesInput = {
   NOT?: Prisma.InstallationScalarWhereWithAggregatesInput | Prisma.InstallationScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Installation"> | string
   githubInstallationId?: Prisma.IntWithAggregatesFilter<"Installation"> | number
-  userId?: Prisma.StringWithAggregatesFilter<"Installation"> | string
+  accountLogin?: Prisma.StringNullableWithAggregatesFilter<"Installation"> | string | null
+  accountAvatarUrl?: Prisma.StringNullableWithAggregatesFilter<"Installation"> | string | null
+  suspended?: Prisma.BoolWithAggregatesFilter<"Installation"> | boolean
+  userId?: Prisma.StringNullableWithAggregatesFilter<"Installation"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Installation"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Installation"> | Date | string
 }
@@ -270,16 +306,22 @@ export type InstallationScalarWhereWithAggregatesInput = {
 export type InstallationCreateInput = {
   id?: string
   githubInstallationId: number
+  accountLogin?: string | null
+  accountAvatarUrl?: string | null
+  suspended?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutInstallationsInput
+  user?: Prisma.UserCreateNestedOneWithoutInstallationsInput
   repositories?: Prisma.RepositoryCreateNestedManyWithoutInstallationInput
 }
 
 export type InstallationUncheckedCreateInput = {
   id?: string
   githubInstallationId: number
-  userId: string
+  accountLogin?: string | null
+  accountAvatarUrl?: string | null
+  suspended?: boolean
+  userId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   repositories?: Prisma.RepositoryUncheckedCreateNestedManyWithoutInstallationInput
@@ -288,16 +330,22 @@ export type InstallationUncheckedCreateInput = {
 export type InstallationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   githubInstallationId?: Prisma.IntFieldUpdateOperationsInput | number
+  accountLogin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountAvatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutInstallationsNestedInput
+  user?: Prisma.UserUpdateOneWithoutInstallationsNestedInput
   repositories?: Prisma.RepositoryUpdateManyWithoutInstallationNestedInput
 }
 
 export type InstallationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   githubInstallationId?: Prisma.IntFieldUpdateOperationsInput | number
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountLogin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountAvatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   repositories?: Prisma.RepositoryUncheckedUpdateManyWithoutInstallationNestedInput
@@ -306,7 +354,10 @@ export type InstallationUncheckedUpdateInput = {
 export type InstallationCreateManyInput = {
   id?: string
   githubInstallationId: number
-  userId: string
+  accountLogin?: string | null
+  accountAvatarUrl?: string | null
+  suspended?: boolean
+  userId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -314,6 +365,9 @@ export type InstallationCreateManyInput = {
 export type InstallationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   githubInstallationId?: Prisma.IntFieldUpdateOperationsInput | number
+  accountLogin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountAvatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -321,7 +375,10 @@ export type InstallationUpdateManyMutationInput = {
 export type InstallationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   githubInstallationId?: Prisma.IntFieldUpdateOperationsInput | number
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountLogin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountAvatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -339,6 +396,9 @@ export type InstallationOrderByRelationAggregateInput = {
 export type InstallationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   githubInstallationId?: Prisma.SortOrder
+  accountLogin?: Prisma.SortOrder
+  accountAvatarUrl?: Prisma.SortOrder
+  suspended?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -351,6 +411,9 @@ export type InstallationAvgOrderByAggregateInput = {
 export type InstallationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   githubInstallationId?: Prisma.SortOrder
+  accountLogin?: Prisma.SortOrder
+  accountAvatarUrl?: Prisma.SortOrder
+  suspended?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -359,6 +422,9 @@ export type InstallationMaxOrderByAggregateInput = {
 export type InstallationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   githubInstallationId?: Prisma.SortOrder
+  accountLogin?: Prisma.SortOrder
+  accountAvatarUrl?: Prisma.SortOrder
+  suspended?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -423,6 +489,10 @@ export type IntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
 export type InstallationCreateNestedOneWithoutRepositoriesInput = {
   create?: Prisma.XOR<Prisma.InstallationCreateWithoutRepositoriesInput, Prisma.InstallationUncheckedCreateWithoutRepositoriesInput>
   connectOrCreate?: Prisma.InstallationCreateOrConnectWithoutRepositoriesInput
@@ -440,6 +510,9 @@ export type InstallationUpdateOneRequiredWithoutRepositoriesNestedInput = {
 export type InstallationCreateWithoutUserInput = {
   id?: string
   githubInstallationId: number
+  accountLogin?: string | null
+  accountAvatarUrl?: string | null
+  suspended?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   repositories?: Prisma.RepositoryCreateNestedManyWithoutInstallationInput
@@ -448,6 +521,9 @@ export type InstallationCreateWithoutUserInput = {
 export type InstallationUncheckedCreateWithoutUserInput = {
   id?: string
   githubInstallationId: number
+  accountLogin?: string | null
+  accountAvatarUrl?: string | null
+  suspended?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   repositories?: Prisma.RepositoryUncheckedCreateNestedManyWithoutInstallationInput
@@ -485,7 +561,10 @@ export type InstallationScalarWhereInput = {
   NOT?: Prisma.InstallationScalarWhereInput | Prisma.InstallationScalarWhereInput[]
   id?: Prisma.StringFilter<"Installation"> | string
   githubInstallationId?: Prisma.IntFilter<"Installation"> | number
-  userId?: Prisma.StringFilter<"Installation"> | string
+  accountLogin?: Prisma.StringNullableFilter<"Installation"> | string | null
+  accountAvatarUrl?: Prisma.StringNullableFilter<"Installation"> | string | null
+  suspended?: Prisma.BoolFilter<"Installation"> | boolean
+  userId?: Prisma.StringNullableFilter<"Installation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Installation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Installation"> | Date | string
 }
@@ -493,15 +572,21 @@ export type InstallationScalarWhereInput = {
 export type InstallationCreateWithoutRepositoriesInput = {
   id?: string
   githubInstallationId: number
+  accountLogin?: string | null
+  accountAvatarUrl?: string | null
+  suspended?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutInstallationsInput
+  user?: Prisma.UserCreateNestedOneWithoutInstallationsInput
 }
 
 export type InstallationUncheckedCreateWithoutRepositoriesInput = {
   id?: string
   githubInstallationId: number
-  userId: string
+  accountLogin?: string | null
+  accountAvatarUrl?: string | null
+  suspended?: boolean
+  userId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -525,15 +610,21 @@ export type InstallationUpdateToOneWithWhereWithoutRepositoriesInput = {
 export type InstallationUpdateWithoutRepositoriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   githubInstallationId?: Prisma.IntFieldUpdateOperationsInput | number
+  accountLogin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountAvatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutInstallationsNestedInput
+  user?: Prisma.UserUpdateOneWithoutInstallationsNestedInput
 }
 
 export type InstallationUncheckedUpdateWithoutRepositoriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   githubInstallationId?: Prisma.IntFieldUpdateOperationsInput | number
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  accountLogin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountAvatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -541,6 +632,9 @@ export type InstallationUncheckedUpdateWithoutRepositoriesInput = {
 export type InstallationCreateManyUserInput = {
   id?: string
   githubInstallationId: number
+  accountLogin?: string | null
+  accountAvatarUrl?: string | null
+  suspended?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -548,6 +642,9 @@ export type InstallationCreateManyUserInput = {
 export type InstallationUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   githubInstallationId?: Prisma.IntFieldUpdateOperationsInput | number
+  accountLogin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountAvatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   repositories?: Prisma.RepositoryUpdateManyWithoutInstallationNestedInput
@@ -556,6 +653,9 @@ export type InstallationUpdateWithoutUserInput = {
 export type InstallationUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   githubInstallationId?: Prisma.IntFieldUpdateOperationsInput | number
+  accountLogin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountAvatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   repositories?: Prisma.RepositoryUncheckedUpdateManyWithoutInstallationNestedInput
@@ -564,6 +664,9 @@ export type InstallationUncheckedUpdateWithoutUserInput = {
 export type InstallationUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   githubInstallationId?: Prisma.IntFieldUpdateOperationsInput | number
+  accountLogin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  accountAvatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  suspended?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -602,10 +705,13 @@ export type InstallationCountOutputTypeCountRepositoriesArgs<ExtArgs extends run
 export type InstallationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   githubInstallationId?: boolean
+  accountLogin?: boolean
+  accountAvatarUrl?: boolean
+  suspended?: boolean
   userId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.Installation$userArgs<ExtArgs>
   repositories?: boolean | Prisma.Installation$repositoriesArgs<ExtArgs>
   _count?: boolean | Prisma.InstallationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["installation"]>
@@ -613,52 +719,64 @@ export type InstallationSelect<ExtArgs extends runtime.Types.Extensions.Internal
 export type InstallationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   githubInstallationId?: boolean
+  accountLogin?: boolean
+  accountAvatarUrl?: boolean
+  suspended?: boolean
   userId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.Installation$userArgs<ExtArgs>
 }, ExtArgs["result"]["installation"]>
 
 export type InstallationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   githubInstallationId?: boolean
+  accountLogin?: boolean
+  accountAvatarUrl?: boolean
+  suspended?: boolean
   userId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.Installation$userArgs<ExtArgs>
 }, ExtArgs["result"]["installation"]>
 
 export type InstallationSelectScalar = {
   id?: boolean
   githubInstallationId?: boolean
+  accountLogin?: boolean
+  accountAvatarUrl?: boolean
+  suspended?: boolean
   userId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type InstallationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "githubInstallationId" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["installation"]>
+export type InstallationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "githubInstallationId" | "accountLogin" | "accountAvatarUrl" | "suspended" | "userId" | "createdAt" | "updatedAt", ExtArgs["result"]["installation"]>
 export type InstallationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.Installation$userArgs<ExtArgs>
   repositories?: boolean | Prisma.Installation$repositoriesArgs<ExtArgs>
   _count?: boolean | Prisma.InstallationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type InstallationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.Installation$userArgs<ExtArgs>
 }
 export type InstallationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  user?: boolean | Prisma.Installation$userArgs<ExtArgs>
 }
 
 export type $InstallationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Installation"
   objects: {
-    user: Prisma.$UserPayload<ExtArgs>
+    user: Prisma.$UserPayload<ExtArgs> | null
     repositories: Prisma.$RepositoryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     githubInstallationId: number
-    userId: string
+    accountLogin: string | null
+    accountAvatarUrl: string | null
+    suspended: boolean
+    userId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["installation"]>
@@ -1055,7 +1173,7 @@ readonly fields: InstallationFieldRefs;
  */
 export interface Prisma__InstallationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  user<T extends Prisma.Installation$userArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Installation$userArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   repositories<T extends Prisma.Installation$repositoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Installation$repositoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RepositoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1088,6 +1206,9 @@ export interface Prisma__InstallationClient<T, Null = never, ExtArgs extends run
 export interface InstallationFieldRefs {
   readonly id: Prisma.FieldRef<"Installation", 'String'>
   readonly githubInstallationId: Prisma.FieldRef<"Installation", 'Int'>
+  readonly accountLogin: Prisma.FieldRef<"Installation", 'String'>
+  readonly accountAvatarUrl: Prisma.FieldRef<"Installation", 'String'>
+  readonly suspended: Prisma.FieldRef<"Installation", 'Boolean'>
   readonly userId: Prisma.FieldRef<"Installation", 'String'>
   readonly createdAt: Prisma.FieldRef<"Installation", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Installation", 'DateTime'>
@@ -1489,6 +1610,25 @@ export type InstallationDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many Installations to delete.
    */
   limit?: number
+}
+
+/**
+ * Installation.user
+ */
+export type Installation$userArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the User
+   */
+  select?: Prisma.UserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the User
+   */
+  omit?: Prisma.UserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserInclude<ExtArgs> | null
+  where?: Prisma.UserWhereInput
 }
 
 /**

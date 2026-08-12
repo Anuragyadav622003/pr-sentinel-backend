@@ -40,6 +40,7 @@ export type RepositoryMinAggregateOutputType = {
   owner: string | null
   name: string | null
   fullName: string | null
+  htmlUrl: string | null
   isActive: boolean | null
   installationId: string | null
   createdAt: Date | null
@@ -52,6 +53,7 @@ export type RepositoryMaxAggregateOutputType = {
   owner: string | null
   name: string | null
   fullName: string | null
+  htmlUrl: string | null
   isActive: boolean | null
   installationId: string | null
   createdAt: Date | null
@@ -64,6 +66,7 @@ export type RepositoryCountAggregateOutputType = {
   owner: number
   name: number
   fullName: number
+  htmlUrl: number
   isActive: number
   installationId: number
   createdAt: number
@@ -86,6 +89,7 @@ export type RepositoryMinAggregateInputType = {
   owner?: true
   name?: true
   fullName?: true
+  htmlUrl?: true
   isActive?: true
   installationId?: true
   createdAt?: true
@@ -98,6 +102,7 @@ export type RepositoryMaxAggregateInputType = {
   owner?: true
   name?: true
   fullName?: true
+  htmlUrl?: true
   isActive?: true
   installationId?: true
   createdAt?: true
@@ -110,6 +115,7 @@ export type RepositoryCountAggregateInputType = {
   owner?: true
   name?: true
   fullName?: true
+  htmlUrl?: true
   isActive?: true
   installationId?: true
   createdAt?: true
@@ -209,6 +215,7 @@ export type RepositoryGroupByOutputType = {
   owner: string
   name: string
   fullName: string
+  htmlUrl: string | null
   isActive: boolean
   installationId: string
   createdAt: Date
@@ -244,6 +251,7 @@ export type RepositoryWhereInput = {
   owner?: Prisma.StringFilter<"Repository"> | string
   name?: Prisma.StringFilter<"Repository"> | string
   fullName?: Prisma.StringFilter<"Repository"> | string
+  htmlUrl?: Prisma.StringNullableFilter<"Repository"> | string | null
   isActive?: Prisma.BoolFilter<"Repository"> | boolean
   installationId?: Prisma.StringFilter<"Repository"> | string
   createdAt?: Prisma.DateTimeFilter<"Repository"> | Date | string
@@ -258,6 +266,7 @@ export type RepositoryOrderByWithRelationInput = {
   owner?: Prisma.SortOrder
   name?: Prisma.SortOrder
   fullName?: Prisma.SortOrder
+  htmlUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   installationId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -275,6 +284,7 @@ export type RepositoryWhereUniqueInput = Prisma.AtLeast<{
   owner?: Prisma.StringFilter<"Repository"> | string
   name?: Prisma.StringFilter<"Repository"> | string
   fullName?: Prisma.StringFilter<"Repository"> | string
+  htmlUrl?: Prisma.StringNullableFilter<"Repository"> | string | null
   isActive?: Prisma.BoolFilter<"Repository"> | boolean
   installationId?: Prisma.StringFilter<"Repository"> | string
   createdAt?: Prisma.DateTimeFilter<"Repository"> | Date | string
@@ -289,6 +299,7 @@ export type RepositoryOrderByWithAggregationInput = {
   owner?: Prisma.SortOrder
   name?: Prisma.SortOrder
   fullName?: Prisma.SortOrder
+  htmlUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
   installationId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -309,6 +320,7 @@ export type RepositoryScalarWhereWithAggregatesInput = {
   owner?: Prisma.StringWithAggregatesFilter<"Repository"> | string
   name?: Prisma.StringWithAggregatesFilter<"Repository"> | string
   fullName?: Prisma.StringWithAggregatesFilter<"Repository"> | string
+  htmlUrl?: Prisma.StringNullableWithAggregatesFilter<"Repository"> | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"Repository"> | boolean
   installationId?: Prisma.StringWithAggregatesFilter<"Repository"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Repository"> | Date | string
@@ -321,6 +333,7 @@ export type RepositoryCreateInput = {
   owner: string
   name: string
   fullName: string
+  htmlUrl?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -334,6 +347,7 @@ export type RepositoryUncheckedCreateInput = {
   owner: string
   name: string
   fullName: string
+  htmlUrl?: string | null
   isActive?: boolean
   installationId: string
   createdAt?: Date | string
@@ -347,6 +361,7 @@ export type RepositoryUpdateInput = {
   owner?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  htmlUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -360,6 +375,7 @@ export type RepositoryUncheckedUpdateInput = {
   owner?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  htmlUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   installationId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -373,6 +389,7 @@ export type RepositoryCreateManyInput = {
   owner: string
   name: string
   fullName: string
+  htmlUrl?: string | null
   isActive?: boolean
   installationId: string
   createdAt?: Date | string
@@ -385,6 +402,7 @@ export type RepositoryUpdateManyMutationInput = {
   owner?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  htmlUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -396,6 +414,7 @@ export type RepositoryUncheckedUpdateManyInput = {
   owner?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  htmlUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   installationId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -418,6 +437,7 @@ export type RepositoryCountOrderByAggregateInput = {
   owner?: Prisma.SortOrder
   name?: Prisma.SortOrder
   fullName?: Prisma.SortOrder
+  htmlUrl?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   installationId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -434,6 +454,7 @@ export type RepositoryMaxOrderByAggregateInput = {
   owner?: Prisma.SortOrder
   name?: Prisma.SortOrder
   fullName?: Prisma.SortOrder
+  htmlUrl?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   installationId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -446,6 +467,7 @@ export type RepositoryMinOrderByAggregateInput = {
   owner?: Prisma.SortOrder
   name?: Prisma.SortOrder
   fullName?: Prisma.SortOrder
+  htmlUrl?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
   installationId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -503,10 +525,6 @@ export type RepositoryUncheckedUpdateManyWithoutInstallationNestedInput = {
   deleteMany?: Prisma.RepositoryScalarWhereInput | Prisma.RepositoryScalarWhereInput[]
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type RepositoryCreateNestedOneWithoutPullRequestsInput = {
   create?: Prisma.XOR<Prisma.RepositoryCreateWithoutPullRequestsInput, Prisma.RepositoryUncheckedCreateWithoutPullRequestsInput>
   connectOrCreate?: Prisma.RepositoryCreateOrConnectWithoutPullRequestsInput
@@ -527,6 +545,7 @@ export type RepositoryCreateWithoutInstallationInput = {
   owner: string
   name: string
   fullName: string
+  htmlUrl?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -539,6 +558,7 @@ export type RepositoryUncheckedCreateWithoutInstallationInput = {
   owner: string
   name: string
   fullName: string
+  htmlUrl?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -580,6 +600,7 @@ export type RepositoryScalarWhereInput = {
   owner?: Prisma.StringFilter<"Repository"> | string
   name?: Prisma.StringFilter<"Repository"> | string
   fullName?: Prisma.StringFilter<"Repository"> | string
+  htmlUrl?: Prisma.StringNullableFilter<"Repository"> | string | null
   isActive?: Prisma.BoolFilter<"Repository"> | boolean
   installationId?: Prisma.StringFilter<"Repository"> | string
   createdAt?: Prisma.DateTimeFilter<"Repository"> | Date | string
@@ -592,6 +613,7 @@ export type RepositoryCreateWithoutPullRequestsInput = {
   owner: string
   name: string
   fullName: string
+  htmlUrl?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -604,6 +626,7 @@ export type RepositoryUncheckedCreateWithoutPullRequestsInput = {
   owner: string
   name: string
   fullName: string
+  htmlUrl?: string | null
   isActive?: boolean
   installationId: string
   createdAt?: Date | string
@@ -632,6 +655,7 @@ export type RepositoryUpdateWithoutPullRequestsInput = {
   owner?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  htmlUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -644,6 +668,7 @@ export type RepositoryUncheckedUpdateWithoutPullRequestsInput = {
   owner?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  htmlUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   installationId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -656,6 +681,7 @@ export type RepositoryCreateManyInstallationInput = {
   owner: string
   name: string
   fullName: string
+  htmlUrl?: string | null
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -667,6 +693,7 @@ export type RepositoryUpdateWithoutInstallationInput = {
   owner?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  htmlUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -679,6 +706,7 @@ export type RepositoryUncheckedUpdateWithoutInstallationInput = {
   owner?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  htmlUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -691,6 +719,7 @@ export type RepositoryUncheckedUpdateManyWithoutInstallationInput = {
   owner?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   fullName?: Prisma.StringFieldUpdateOperationsInput | string
+  htmlUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -733,6 +762,7 @@ export type RepositorySelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   owner?: boolean
   name?: boolean
   fullName?: boolean
+  htmlUrl?: boolean
   isActive?: boolean
   installationId?: boolean
   createdAt?: boolean
@@ -748,6 +778,7 @@ export type RepositorySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   owner?: boolean
   name?: boolean
   fullName?: boolean
+  htmlUrl?: boolean
   isActive?: boolean
   installationId?: boolean
   createdAt?: boolean
@@ -761,6 +792,7 @@ export type RepositorySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   owner?: boolean
   name?: boolean
   fullName?: boolean
+  htmlUrl?: boolean
   isActive?: boolean
   installationId?: boolean
   createdAt?: boolean
@@ -774,13 +806,14 @@ export type RepositorySelectScalar = {
   owner?: boolean
   name?: boolean
   fullName?: boolean
+  htmlUrl?: boolean
   isActive?: boolean
   installationId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type RepositoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "githubRepoId" | "owner" | "name" | "fullName" | "isActive" | "installationId" | "createdAt" | "updatedAt", ExtArgs["result"]["repository"]>
+export type RepositoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "githubRepoId" | "owner" | "name" | "fullName" | "htmlUrl" | "isActive" | "installationId" | "createdAt" | "updatedAt", ExtArgs["result"]["repository"]>
 export type RepositoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   installation?: boolean | Prisma.InstallationDefaultArgs<ExtArgs>
   pullRequests?: boolean | Prisma.Repository$pullRequestsArgs<ExtArgs>
@@ -805,6 +838,7 @@ export type $RepositoryPayload<ExtArgs extends runtime.Types.Extensions.Internal
     owner: string
     name: string
     fullName: string
+    htmlUrl: string | null
     isActive: boolean
     installationId: string
     createdAt: Date
@@ -1239,6 +1273,7 @@ export interface RepositoryFieldRefs {
   readonly owner: Prisma.FieldRef<"Repository", 'String'>
   readonly name: Prisma.FieldRef<"Repository", 'String'>
   readonly fullName: Prisma.FieldRef<"Repository", 'String'>
+  readonly htmlUrl: Prisma.FieldRef<"Repository", 'String'>
   readonly isActive: Prisma.FieldRef<"Repository", 'Boolean'>
   readonly installationId: Prisma.FieldRef<"Repository", 'String'>
   readonly createdAt: Prisma.FieldRef<"Repository", 'DateTime'>
