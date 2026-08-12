@@ -43,7 +43,7 @@ export class PullRequestController {
 
     return prs.map((pr) => ({
       id: pr.id,
-      githubPrId: pr.githubPrId,
+      githubPrId: Number(pr.githubPrId),
       githubPrNumber: pr.githubPrNumber,
       title: pr.title,
       author: pr.author,
@@ -84,7 +84,7 @@ export class PullRequestController {
 
     return {
       id: pr.id,
-      githubPrId: pr.githubPrId,
+      githubPrId: Number(pr.githubPrId),
       githubPrNumber: pr.githubPrNumber,
       title: pr.title,
       author: pr.author,

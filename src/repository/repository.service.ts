@@ -26,13 +26,15 @@ export class RepositoryService {
    *   The placeholder is claimed later by upsertInstallationWithUser().
    */
   async upsertInstallation(
-    githubInstallationId: number,
+    githubInstallationId: number | bigint,
     userId: string | null,
   ) {
+    const ghId = BigInt(githubInstallationId);
+
     const installation = await this.prisma.installation.upsert({
-      where: { githubInstallationId },
+      where: { githubInstallationId: ghId },
       create: {
-        githubInstallationId,
+        githubInstallationId: ghId,
         userId, // may be null — claimed later
         suspended: false,
       },
@@ -52,9 +54,11 @@ export class RepositoryService {
   }
 
   /** Hard-delete an installation.  Cascades to Repository → PullRequest. */
-  async deleteInstallation(githubInstallationId: number) {
+  async deleteInstallation(githubInstallationId: number | bigint) {
+    const ghId = BigInt(githubInstallationId);
+
     const existing = await this.prisma.installation.findUnique({
-      where: { githubInstallationId },
+      where: { githubInstallationId: ghId },
     });
 
     if (!existing) {
@@ -64,7 +68,9 @@ export class RepositoryService {
       return;
     }
 
-    await this.prisma.installation.delete({ where: { githubInstallationId } });
+    await this.prisma.installation.delete({
+      where: { githubInstallationId: ghId },
+    });
     this.logger.log(`Installation ${githubInstallationId} deleted`);
   }
 
@@ -73,15 +79,17 @@ export class RepositoryService {
    * Does NOT delete it — suspended installations keep their data so the user
    * can see the "suspended" state in the UI and reconnect.
    */
-  async suspendInstallation(githubInstallationId: number) {
+  async suspendInstallation(githubInstallationId: number | bigint) {
+    const ghId = BigInt(githubInstallationId);
+
     const existing = await this.prisma.installation.findUnique({
-      where: { githubInstallationId },
+      where: { githubInstallationId: ghId },
     });
 
     if (!existing) {
       // Webhook beat the install flow — create a suspended placeholder.
       await this.prisma.installation.create({
-        data: { githubInstallationId, userId: null, suspended: true },
+        data: { githubInstallationId: ghId, userId: null, suspended: true },
       });
       this.logger.warn(
         `Installation ${githubInstallationId} not found on suspend — created suspended placeholder`,
@@ -90,7 +98,7 @@ export class RepositoryService {
     }
 
     await this.prisma.installation.update({
-      where: { githubInstallationId },
+      where: { githubInstallationId: ghId },
       data: { suspended: true, updatedAt: new Date() },
     });
     this.logger.log(`Installation ${githubInstallationId} suspended`);
@@ -100,9 +108,11 @@ export class RepositoryService {
    * Mark the installation as active again and re-sync repositories.
    * Called on `unsuspend` webhook action.
    */
-  async unsuspendInstallation(githubInstallationId: number) {
+  async unsuspendInstallation(githubInstallationId: number | bigint) {
+    const ghId = BigInt(githubInstallationId);
+
     const existing = await this.prisma.installation.findUnique({
-      where: { githubInstallationId },
+      where: { githubInstallationId: ghId },
     });
 
     if (!existing) {
@@ -113,7 +123,7 @@ export class RepositoryService {
     }
 
     await this.prisma.installation.update({
-      where: { githubInstallationId },
+      where: { githubInstallationId: ghId },
       data: { suspended: false, updatedAt: new Date() },
     });
     this.logger.log(`Installation ${githubInstallationId} unsuspended`);
@@ -138,10 +148,12 @@ export class RepositoryService {
   ) {
     const [owner] = repo.full_name.split('/');
 
+    const githubRepoId = BigInt(repo.id);
+
     const repository = await this.prisma.repository.upsert({
-      where: { githubRepoId: repo.id },
+      where: { githubRepoId },
       create: {
-        githubRepoId: repo.id,
+        githubRepoId,
         owner,
         name: repo.name,
         fullName: repo.full_name,
@@ -167,9 +179,11 @@ export class RepositoryService {
   }
 
   /** Soft-deactivate a repository (isActive = false). */
-  async deactivateRepository(githubRepoId: number) {
+  async deactivateRepository(githubRepoId: number | bigint) {
+    const ghRepoId = BigInt(githubRepoId);
+
     const existing = await this.prisma.repository.findUnique({
-      where: { githubRepoId },
+      where: { githubRepoId: ghRepoId },
     });
 
     if (!existing) {
@@ -180,7 +194,7 @@ export class RepositoryService {
     }
 
     await this.prisma.repository.update({
-      where: { githubRepoId },
+      where: { githubRepoId: ghRepoId },
       data: { isActive: false, updatedAt: new Date() },
     });
 
@@ -190,10 +204,10 @@ export class RepositoryService {
   // ─── Lookup helpers ────────────────────────────────────────────────────────
 
   async findInstallationByGithubId(
-    githubInstallationId: number,
+    githubInstallationId: number | bigint,
   ): Promise<Installation | null> {
     return this.prisma.installation.findUnique({
-      where: { githubInstallationId },
+      where: { githubInstallationId: BigInt(githubInstallationId) },
     });
   }
 
@@ -219,19 +233,21 @@ export class RepositoryService {
    *   explicit uninstall → reinstall.
    */
   async upsertInstallationWithUser(
-    githubInstallationId: number,
+    githubInstallationId: number | bigint,
     userId: string,
     accountLogin: string,
     accountAvatarUrl: string,
   ) {
+    const ghId = BigInt(githubInstallationId);
+
     const existing = await this.prisma.installation.findUnique({
-      where: { githubInstallationId },
+      where: { githubInstallationId: ghId },
     });
 
     const installation = await this.prisma.installation.upsert({
-      where: { githubInstallationId },
+      where: { githubInstallationId: ghId },
       create: {
-        githubInstallationId,
+        githubInstallationId: ghId,
         userId,
         accountLogin,
         accountAvatarUrl,
@@ -264,9 +280,9 @@ export class RepositoryService {
     });
   }
 
-  async findByGithubRepoId(githubRepoId: number) {
+  async findByGithubRepoId(githubRepoId: number | bigint) {
     return this.prisma.repository.findUnique({
-      where: { githubRepoId },
+      where: { githubRepoId: BigInt(githubRepoId) },
     });
   }
 
@@ -291,7 +307,7 @@ export class RepositoryService {
    */
   async syncInstallationRepositories(
     installationDbId: string,
-    githubInstallationId: number,
+    githubInstallationId: number | bigint,
     githubRepos?: Array<{
       id: number;
       name: string;
@@ -313,9 +329,9 @@ export class RepositoryService {
     );
 
     // ── Upsert every repo GitHub returned ─────────────────────────────────
-    const returnedGithubIds = new Set<number>();
+    const returnedGithubIds = new Set<bigint>();
     for (const repo of repos) {
-      returnedGithubIds.add(repo.id);
+      returnedGithubIds.add(BigInt(repo.id));
       await this.upsertRepository(installationDbId, {
         id: repo.id,
         name: repo.name,

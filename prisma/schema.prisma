@@ -51,7 +51,7 @@ model User {
 
 model Installation {
   id                   String   @id @default(uuid())
-  githubInstallationId Int      @unique
+  githubInstallationId BigInt   @unique
 
   // GitHub account that owns the installation (user or org)
   accountLogin         String?
@@ -74,7 +74,7 @@ model Installation {
 
 model Repository {
   id           String  @id @default(uuid())
-  githubRepoId Int     @unique
+  githubRepoId BigInt  @unique
   owner        String
   name         String
   fullName     String
@@ -94,7 +94,7 @@ model Repository {
 
 model PullRequest {
   id             String @id @default(uuid())
-  githubPrId     Int    @unique
+  githubPrId     BigInt @unique
   githubPrNumber Int
 
   title  String

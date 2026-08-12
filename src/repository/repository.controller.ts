@@ -35,7 +35,7 @@ export class RepositoryController {
 
     return repos.map((r) => ({
       id: r.id,
-      githubRepoId: r.githubRepoId,
+      githubRepoId: Number(r.githubRepoId),
       owner: r.owner,
       name: r.name,
       fullName: r.fullName,
@@ -61,7 +61,7 @@ export class RepositoryController {
 
     return {
       id: repo.id,
-      githubRepoId: repo.githubRepoId,
+      githubRepoId: Number(repo.githubRepoId),
       owner: repo.owner,
       name: repo.name,
       fullName: repo.fullName,
@@ -92,7 +92,7 @@ export class RepositoryController {
 
     return prs.map((pr) => ({
       id: pr.id,
-      githubPrId: pr.githubPrId,
+      githubPrId: Number(pr.githubPrId),
       githubPrNumber: pr.githubPrNumber,
       title: pr.title,
       author: pr.author,
