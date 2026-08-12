@@ -37,7 +37,9 @@ async function bootstrap() {
 
   // ── Global prefix — all API routes live under /api except the webhook
   //    receiver which GitHub calls directly at /webhook/github.
-  app.setGlobalPrefix('api', { exclude: ['webhook/github'] });
+  app.setGlobalPrefix('api', {
+    exclude: ['webhook/github', '', 'health'],
+  });
  
   // ── CORS — allow the frontend origin to send credentialed requests so the
   //    browser includes the accessToken cookie on every API call.

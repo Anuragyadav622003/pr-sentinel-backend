@@ -69,7 +69,7 @@ export class WebhookService {
           message: 'Event received but not processed',
         };
     }
-  }
+  } 
 
   // ─── pull_request ─────────────────────────────────────────────────────────
 

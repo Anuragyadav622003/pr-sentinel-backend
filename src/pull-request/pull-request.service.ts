@@ -236,4 +236,23 @@ export class PullRequestService {
       },
     });
   }
+
+  /**
+   * Return a single changed file (including patch) scoped to the user's PR.
+   */
+  async findFileForUser(
+    pullRequestId: string,
+    fileId: string,
+    userId: string,
+  ) {
+    return this.prisma.prFile.findFirst({
+      where: {
+        id: fileId,
+        pullRequestId,
+        pullRequest: {
+          repository: { installation: { userId } },
+        },
+      },
+    });
+  }
 }

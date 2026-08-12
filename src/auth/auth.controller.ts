@@ -58,12 +58,13 @@ export class AuthController {
     try {
       const result = await this.authService.handleGithubCallback(code, state);
       this.setAccessTokenCookie(res, result.accessToken);
-
+console.log("result",result)
       const callbackUrl = new URL('/auth/callback', this.getFrontendUrl());
+      console.log(callbackUrl)
       if (result.redirect) {
         callbackUrl.searchParams.set('redirect', result.redirect);
       }
-
+      console.log("callback 0Auth login", callbackUrl);
       res.redirect(callbackUrl.toString());
     } catch {
       res.redirect(this.buildFrontendErrorUrl('GitHub authentication failed'));

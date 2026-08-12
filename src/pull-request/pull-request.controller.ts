@@ -66,6 +66,39 @@ export class PullRequestController {
     }));
   }
 
+  // ─── GET /api/pull-requests/:id/files/:fileId ─────────────────────────────
+  //
+  // Returns unified diff patch for a single changed file. Ownership is enforced
+  // via the user's installation scope.
+
+  @Get(':id/files/:fileId')
+  async getFile(
+    @Param('id') id: string,
+    @Param('fileId') fileId: string,
+    @Req() req: AuthedRequest,
+  ) {
+    const file = await this.pullRequestService.findFileForUser(
+      id,
+      fileId,
+      req.user.id,
+    );
+    if (!file) {
+      throw new NotFoundException('File not found');
+    }
+
+    return {
+      id: file.id,
+      filename: file.filename,
+      status: file.status.toLowerCase(),
+      additions: file.additions,
+      deletions: file.deletions,
+      changes: file.changes,
+      pullRequestId: file.pullRequestId,
+      patch: file.patch ?? null,
+      createdAt: file.createdAt.toISOString(),
+    };
+  }
+
   // ─── GET /api/pull-requests/:id ───────────────────────────────────────────
   //
   // Full PR detail including changed files and the latest review + comments.
