@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
+import { RedisService } from './shared/redis/redis.service';
 import { AuthModule } from './auth/auth.module';
 import { GithubModule } from './github/github.module';
 import { LlmModule } from './llm/llm.module';
@@ -25,5 +26,6 @@ import { WebhookModule } from './webhook/webhook.module';
     WebhookModule,
   ],
   controllers: [AppController],
+  providers: [RedisService],
 })
 export class AppModule {}

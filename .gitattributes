@@ -2,6 +2,11 @@
 *.ts text eol=lf
 *.tsx text eol=lf
 
+# Docker files — backslash continuations break on CRLF
+Dockerfile text eol=lf
+.dockerignore text eol=lf
+docker-entrypoint.sh text eol=lf
+
 # Treat PEM files as binary to prevent line-ending conversion
 *.pem binary
 

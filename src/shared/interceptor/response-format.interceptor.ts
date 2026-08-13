@@ -34,6 +34,10 @@ export class ResponseFormatInterceptor<T>
 
         const request = context.switchToHttp().getRequest();
 
+        if (request?.url === '/health') {
+          return data;
+        }
+
         return {
           success: true,
           message: 'Request successful',

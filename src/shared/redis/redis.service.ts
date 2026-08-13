@@ -45,4 +45,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   async del(key: string): Promise<void> {
     await this.client.del(key);
   }
+
+  /** Ping Redis for health checks. */
+  async ping(): Promise<string> {
+    return this.client.ping();
+  }
 }
