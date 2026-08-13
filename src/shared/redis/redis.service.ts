@@ -10,11 +10,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly configService: ConfigService) {}
 
   onModuleInit() {
-    this.client = new Redis({
-      host: this.configService.get<string>('REDIS_HOST') ?? 'localhost',
-      port: this.configService.get<number>('REDIS_PORT') ?? 6379,
-      lazyConnect: true,
-    });
+    this.client = this.createClient();
 
     this.client.on('error', (err) => {
       this.logger.error(`Redis error: ${err.message}`);
@@ -49,5 +45,36 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   /** Ping Redis for health checks. */
   async ping(): Promise<string> {
     return this.client.ping();
+  }
+
+  /**
+   * Prefer REDIS_URL (Render injects this when Key Value is linked to the
+   * web service). Fall back to REDIS_HOST/REDIS_PORT for local Docker dev.
+   */
+  private createClient(): Redis {
+    const redisUrl = this.configService.get<string>('REDIS_URL');
+    const commonOptions = {
+      lazyConnect: true,
+      // Render private-network DNS resolves over IPv4.
+      family: 4 as const,
+      retryStrategy: (times: number) => Math.min(times * 200, 2000),
+    };
+
+    if (redisUrl) {
+      this.logger.log('Connecting to Redis via REDIS_URL');
+      return new Redis(redisUrl, commonOptions);
+    }
+
+    const host = this.configService.get<string>('REDIS_HOST') ?? 'localhost';
+    const port = Number(this.configService.get<string>('REDIS_PORT') ?? 6379);
+    const password = this.configService.get<string>('REDIS_PASSWORD');
+
+    this.logger.log(`Connecting to Redis at ${host}:${port}`);
+    return new Redis({
+      ...commonOptions,
+      host,
+      port,
+      ...(password ? { password } : {}),
+    });
   }
 }
