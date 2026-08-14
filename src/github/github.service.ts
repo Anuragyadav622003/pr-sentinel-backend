@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { createAppAuth } from '@octokit/auth-app';
 import axios from 'axios';
 import * as fs from 'fs';
@@ -13,8 +13,23 @@ export interface GitHubInstallationInfo {
 }
 
 @Injectable()
-export class GithubService {
+export class GithubService implements OnModuleInit {
   private readonly logger = new Logger(GithubService.name);
+
+  onModuleInit() {
+    try {
+      this.getPrivateKey();
+      if (!process.env.GITHUB_APP_ID) {
+        throw new Error('GITHUB_APP_ID is not configured');
+      }
+      this.logger.log('GitHub App credentials loaded');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.error(
+        `GitHub App not configured — install/webhook flows will fail: ${msg}`,
+      );
+    }
+  }
 
   /**
    * Resolve the GitHub App private key.
@@ -79,30 +94,53 @@ export class GithubService {
     const auth = this.getAppAuth();
     const { token } = await auth({ type: 'app' });
 
-    const response = await axios.get(
-      `https://api.github.com/app/installations/${installationId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/vnd.github+json',
-          'X-GitHub-Api-Version': '2022-11-28',
+    try {
+      const response = await axios.get(
+        `https://api.github.com/app/installations/${installationId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+          },
         },
-      },
-    );
+      );
 
-    const data = response.data;
-    this.logger.log(
-      `Verified installation ${installationId}: account=${data.account.login}`,
-    );
+      const data = response.data;
+      this.logger.log(
+        `Verified installation ${installationId}: account=${data.account.login}`,
+      );
 
-    return {
-      id: data.id,
-      accountLogin: data.account.login,
-      accountAvatarUrl: data.account.avatar_url,
-      accountType: data.account.type,
-      repositorySelection: data.repository_selection,
-      appSlug: data.app_slug,
-    };
+      return {
+        id: data.id,
+        accountLogin: data.account.login,
+        accountAvatarUrl: data.account.avatar_url,
+        accountType: data.account.type,
+        repositorySelection: data.repository_selection,
+        appSlug: data.app_slug,
+      };
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const status = err.response?.status;
+        const ghMessage =
+          (err.response?.data as { message?: string } | undefined)?.message ??
+          err.message;
+        this.logger.error(
+          `GitHub installation verify failed: installationId=${installationId} status=${status} message=${ghMessage}`,
+        );
+        if (status === 401 || status === 403) {
+          throw new Error(
+            'GitHub App authentication failed. Check GITHUB_APP_ID and GITHUB_APP_PRIVATE_KEY on the server.',
+          );
+        }
+        if (status === 404) {
+          throw new Error(
+            `GitHub installation ${installationId} was not found for this GitHub App.`,
+          );
+        }
+      }
+      throw err;
+    }
   }
 
   /**

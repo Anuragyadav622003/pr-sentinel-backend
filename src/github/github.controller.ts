@@ -45,7 +45,18 @@ async function verifyAndSync(
   let info: Awaited<ReturnType<GithubService['verifyInstallationWithGitHub']>>;
   try {
     info = await githubService.verifyInstallationWithGitHub(githubInstallationId);
-  } catch {
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error(
+      `verifyAndSync failed for installation ${githubInstallationId}: ${msg}`,
+    );
+    if (
+      msg.includes('GITHUB_APP') ||
+      msg.includes('private key') ||
+      msg.includes('authentication failed')
+    ) {
+      throw new InternalServerErrorException(msg);
+    }
     throw new BadRequestException(
       "We couldn't verify your GitHub installation. " +
         'Please check that the PR Sentinel GitHub App is still installed and try again.',
