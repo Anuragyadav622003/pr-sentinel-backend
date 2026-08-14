@@ -43,8 +43,12 @@ async function bootstrap() {
  
   // ── CORS — allow the frontend origin to send credentialed requests so the
   //    browser includes the accessToken cookie on every API call.
+  const frontendOrigin = (process.env.FRONTEND_URL ?? 'http://localhost:3001').replace(
+    /\/$/,
+    '',
+  );
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:3001',
+    origin: frontendOrigin,
     credentials: true,
   });
 

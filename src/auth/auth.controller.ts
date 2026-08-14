@@ -58,13 +58,11 @@ export class AuthController {
     try {
       const result = await this.authService.handleGithubCallback(code, state);
       this.setAccessTokenCookie(res, result.accessToken);
-console.log("result",result)
+
       const callbackUrl = new URL('/auth/callback', this.getFrontendUrl());
-      console.log(callbackUrl)
       if (result.redirect) {
         callbackUrl.searchParams.set('redirect', result.redirect);
       }
-      console.log("callback 0Auth login", callbackUrl);
       res.redirect(callbackUrl.toString());
     } catch {
       res.redirect(this.buildFrontendErrorUrl('GitHub authentication failed'));
@@ -122,23 +120,43 @@ console.log("result",result)
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('accessToken', {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-    });
+    res.clearCookie('accessToken', this.getClearCookieOptions());
     return { message: 'Logged out successfully' };
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────────
 
-  private setAccessTokenCookie(res: Response, accessToken: string): void {
-    res.cookie('accessToken', accessToken, {
+  /** Vercel frontend + Render backend requires SameSite=None cookies. */
+  private usesCrossSiteCookies(): boolean {
+    const frontend = (process.env.FRONTEND_URL ?? '').replace(/\/$/, '');
+    if (!frontend) return false;
+    try {
+      const url = new URL(frontend);
+      return url.protocol === 'https:' && !url.hostname.includes('localhost');
+    } catch {
+      return false;
+    }
+  }
+
+  private getCookieOptions() {
+    const crossSite = this.usesCrossSiteCookies();
+    return {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: crossSite,
+      sameSite: (crossSite ? 'none' : 'lax') as 'none' | 'lax',
+      path: '/',
       maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-    });
+    };
+  }
+
+  /** clearCookie must match set options but omit maxAge. */
+  private getClearCookieOptions() {
+    const { maxAge: _maxAge, ...options } = this.getCookieOptions();
+    return options;
+  }
+
+  private setAccessTokenCookie(res: Response, accessToken: string): void {
+    res.cookie('accessToken', accessToken, this.getCookieOptions());
   }
 
   private getFrontendUrl(): string {
