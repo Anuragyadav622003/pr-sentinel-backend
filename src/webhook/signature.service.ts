@@ -41,6 +41,7 @@ export class SignatureService {
     const signatureBuffer = Buffer.from(signature);
     const expectedBuffer = Buffer.from(expectedSignature);
 
+    
     if (
       signatureBuffer.length !== expectedBuffer.length ||
       !crypto.timingSafeEqual(
@@ -54,3 +55,5 @@ export class SignatureService {
     }
   }
 }
+
+    //GitHub and my backend share a secret. GitHub signs the raw webhook payload using HMAC SHA-256. My backend generates the same signature and securely compares them. If they match, I trust the request.

@@ -7,6 +7,8 @@ import https from 'https';
 import { ResponseFormatInterceptor } from './shared/interceptor/response-format.interceptor';
 import { AllExceptionsFilter } from './shared/filters/all-exceptions.filter';
 
+// Force outgoing HTTPS requests to use IPv4.
+// This helps avoid IPv6/DNS connectivity issues when communicating with the GitHub API.
 https.globalAgent.options.family = 4;
 
 async function bootstrap() {
@@ -19,6 +21,8 @@ async function bootstrap() {
   // ── Raw-body capture — must be registered before any body-consuming
   //    middleware.  The verify callback runs synchronously while the body is
   //    being read and attaches the raw Buffer to the request object.
+  // Capture the original raw request body before JSON parsing.
+// The raw Buffer is required for GitHub webhook signature verification.
   app.use(
     express.json({
       verify: (
@@ -30,6 +34,8 @@ async function bootstrap() {
       },
     }),
   );
+  //Parse URL-encoded request bodies (e.g. HTML form data)
+  //name=Anurag&age=23&city=Gurgaon become {name:Anurag, age:23,city:Gurugram} 
   app.use(express.urlencoded({ extended: true }));
 
   // ── Cookie parser (needed for HttpOnly JWT extraction by JwtStrategy)
