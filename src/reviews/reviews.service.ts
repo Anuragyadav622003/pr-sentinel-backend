@@ -4,36 +4,46 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ReviewStatus } from 'src/generated/prisma/client';
-import { LlmService, LlmMessage } from 'src/llm/llm.service';
+import { LlmService } from 'src/llm/llm.service';
+import { LlmMessage } from 'src/llm/types/llm.types';
+import { RedisService } from 'src/shared/redis/redis.service';
+import type { GenerateReviewJobData } from './processors/review.processor';
 
-// ─── In-memory conversation store ────────────────────────────────────────────
-//
-// Conversations are keyed by a UUID that the client echoes back on each turn.
-// For this iteration we keep messages in memory; they are automatically
-// discarded when the server restarts. A future iteration could persist them
-// in a Redis cache or a new Prisma model.
-//
-// The store is scoped to (userId, reviewId) so one user cannot read another
-// user's conversation even if they somehow guess the conversationId.
+// ─── Conversation TTL ─────────────────────────────────────────────────────────
+// Conversations expire after 2 hours of inactivity.
+const CONVERSATION_TTL_SECONDS = 2 * 60 * 60;
+const CONVERSATION_KEY_PREFIX = 'chat-conversation:';
 
-interface ConversationEntry {
-  userId: string;
-  reviewId: string;
-  /** Full message history including system prompt. */
-  messages: LlmMessage[];
-  updatedAt: Date;
+// ─── Review context / prompt helpers ─────────────────────────────────────────
+
+interface ReviewContext {
+  repository: { owner: string; name: string } | null;
+  prNumber: number;
+  prTitle: string;
+  prAuthor: string;
+  baseBranch: string;
+  headBranch: string;
+  prDescription: string | null;
+  files: Array<{
+    filename: string;
+    status: string;
+    additions: number;
+    deletions: number;
+  }>;
+  reviewSummary: string | null;
+  findings: Array<{
+    severity: string | null;
+    filePath: string;
+    lineNumber: number | null;
+    category: string | null;
+    message: string;
+    suggestion: string | null;
+  }>;
 }
-
-const conversationStore = new Map<string, ConversationEntry>();
-
-function makeConversationId(): string {
-  // crypto.randomUUID() is available in Node 15+
-  return crypto.randomUUID();
-}
-
-// ─── System prompt builder ────────────────────────────────────────────────────
 
 function buildSystemPrompt(ctx: ReviewContext): string {
   const repo = ctx.repository
@@ -99,34 +109,13 @@ ${ctx.reviewSummary ? `=== AI REVIEW SUMMARY ===\n${ctx.reviewSummary}` : ''}
 You are reviewing PRs, not judging the developer. Keep the tone professional and constructive.`;
 }
 
-// ─── Context shape ────────────────────────────────────────────────────────────
+// ─── Conversation persistence helpers (Redis) ────────────────────────────────
 
-interface ReviewContext {
-  repository: { owner: string; name: string } | null;
-  prNumber: number;
-  prTitle: string;
-  prAuthor: string;
-  baseBranch: string;
-  headBranch: string;
-  prDescription: string | null;
-  files: Array<{
-    filename: string;
-    status: string;
-    additions: number;
-    deletions: number;
-  }>;
-  reviewSummary: string | null;
-  findings: Array<{
-    severity: string | null;
-    filePath: string;
-    lineNumber: number | null;
-    category: string | null;
-    message: string;
-    suggestion: string | null;
-  }>;
+interface StoredConversation {
+  userId: string;
+  reviewId: string;
+  messages: LlmMessage[];
 }
-
-// ─── Service ──────────────────────────────────────────────────────────────────
 
 @Injectable()
 export class ReviewsService {
@@ -135,14 +124,12 @@ export class ReviewsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly llm: LlmService,
+    private readonly redis: RedisService,
+    @InjectQueue('review') private readonly reviewQueue: Queue<GenerateReviewJobData>,
   ) {}
 
-  // ─── Ownership check ───────────────────────────────────────────────────────
+  // ─── Queries ───────────────────────────────────────────────────────────────
 
-  /**
-   * Returns the review only when it belongs to a PR in one of the
-   * authenticated user's repositories. Returns null otherwise.
-   */
   async findByIdForUser(reviewId: string, userId: string) {
     return this.prisma.review.findFirst({
       where: {
@@ -165,8 +152,6 @@ export class ReviewsService {
     });
   }
 
-  // ─── List all reviews for user ─────────────────────────────────────────────
-
   async findAllForUser(userId: string) {
     return this.prisma.review.findMany({
       where: {
@@ -180,8 +165,6 @@ export class ReviewsService {
       orderBy: { createdAt: 'desc' },
     });
   }
-
-  // ─── Get by pull request ───────────────────────────────────────────────────
 
   async findByPullRequestForUser(pullRequestId: string, userId: string) {
     return this.prisma.review.findFirst({
@@ -198,7 +181,7 @@ export class ReviewsService {
     });
   }
 
-  // ─── Retry a failed review ─────────────────────────────────────────────────
+  // ─── Retry ─────────────────────────────────────────────────────────────────
 
   async retryReview(reviewId: string, userId: string) {
     const review = await this.findByIdForUser(reviewId, userId);
@@ -207,14 +190,29 @@ export class ReviewsService {
       throw new BadRequestException('Only FAILED reviews can be retried');
     }
 
-    return this.prisma.review.update({
+    const updated = await this.prisma.review.update({
       where: { id: reviewId },
       data: { status: ReviewStatus.PENDING, errorMessage: null, updatedAt: new Date() },
       include: { comments: { orderBy: { createdAt: 'asc' } } },
     });
+
+    // Re-enqueue the review job so the worker picks it up again.
+    await this.reviewQueue.add(
+      'generate-review',
+      { pullRequestId: review.pullRequestId, userId },
+      {
+        attempts: 3,
+        backoff: { type: 'exponential', delay: 5000 },
+        removeOnComplete: 100,
+        removeOnFail: 200,
+      },
+    );
+
+    this.logger.log(`Enqueued retry job for review ${reviewId}`);
+    return updated;
   }
 
-  // ─── AI Chat ───────────────────────────────────────────────────────────────
+  // ─── Chat ──────────────────────────────────────────────────────────────────
 
   async chat(
     reviewId: string,
@@ -222,11 +220,9 @@ export class ReviewsService {
     userMessage: string,
     conversationId?: string,
   ): Promise<{ message: string; conversationId: string }> {
-    // 1. Load review with full PR context — enforces ownership
     const review = await this.findByIdForUser(reviewId, userId);
     if (!review) throw new NotFoundException('Review not found');
 
-    // 2. Build rich context for the system prompt
     const pr = review.pullRequest;
     const context: ReviewContext = {
       repository: pr.repository
@@ -237,7 +233,7 @@ export class ReviewsService {
       prAuthor: pr.author,
       baseBranch: pr.baseBranch,
       headBranch: pr.headBranch,
-      prDescription: null, // not stored in current schema
+      prDescription: null,
       files: pr.files.map((f) => ({
         filename: f.filename,
         status: f.status.toLowerCase(),
@@ -251,57 +247,73 @@ export class ReviewsService {
         lineNumber: c.lineNumber ?? null,
         category: c.category ?? null,
         message: c.message,
-        suggestion: null, // not stored in current schema revision
+        suggestion: null,
       })),
     };
 
     const systemPrompt = buildSystemPrompt(context);
 
-    // 3. Resolve or create conversation
-    let entry = conversationId
-      ? conversationStore.get(conversationId)
-      : undefined;
-
-    // Validate ownership of an existing conversation
-    if (entry && (entry.userId !== userId || entry.reviewId !== reviewId)) {
-      entry = undefined; // treat as a new conversation
+    // Load existing conversation from Redis (or start a new one).
+    let stored: StoredConversation | null = null;
+    if (conversationId) {
+      stored = await this.loadConversation(conversationId);
+      // Discard if it belongs to a different user or review.
+      if (stored && (stored.userId !== userId || stored.reviewId !== reviewId)) {
+        stored = null;
+      }
     }
 
-    if (!entry) {
-      conversationId = makeConversationId();
-      entry = {
+    if (!stored) {
+      conversationId = crypto.randomUUID();
+      stored = {
         userId,
         reviewId,
         messages: [{ role: 'system', content: systemPrompt }],
-        updatedAt: new Date(),
       };
-      conversationStore.set(conversationId, entry);
     } else {
-      // Refresh the system prompt on every turn so updated review data is used
-      entry.messages[0] = { role: 'system', content: systemPrompt };
+      // Refresh system prompt with latest review state on every turn.
+      stored.messages[0] = { role: 'system', content: systemPrompt };
     }
 
-    // 4. Append the user message
-    entry.messages.push({ role: 'user', content: userMessage });
-    entry.updatedAt = new Date();
+    stored.messages.push({ role: 'user', content: userMessage });
 
-    // 5. Call the LLM with the full conversation history
     let assistantReply: string;
     try {
-      assistantReply = await this.llm.chat({ messages: entry.messages });
+      assistantReply = await this.llm.chat(userId, stored.messages);
     } catch (err) {
-      // Remove the user message we just added so the conversation stays clean
-      entry.messages.pop();
+      // Don't persist the failed user message.
+      stored.messages.pop();
+      await this.saveConversation(conversationId!, stored);
       throw err;
     }
 
-    // 6. Append assistant reply and persist
-    entry.messages.push({ role: 'assistant', content: assistantReply });
+    stored.messages.push({ role: 'assistant', content: assistantReply });
+    await this.saveConversation(conversationId!, stored);
 
+    const turns = Math.floor((stored.messages.length - 1) / 2);
     this.logger.log(
-      `Chat turn: review=${reviewId} conversation=${conversationId} turns=${Math.floor((entry.messages.length - 1) / 2)}`,
+      `Chat turn: review=${reviewId} conversation=${conversationId} turns=${turns}`,
     );
 
     return { message: assistantReply, conversationId: conversationId! };
+  }
+
+  // ─── Redis conversation helpers ────────────────────────────────────────────
+
+  private redisKey(conversationId: string): string {
+    return `${CONVERSATION_KEY_PREFIX}${conversationId}`;
+  }
+
+  private async loadConversation(
+    conversationId: string,
+  ): Promise<StoredConversation | null> {
+    return this.redis.get<StoredConversation>(this.redisKey(conversationId));
+  }
+
+  private async saveConversation(
+    conversationId: string,
+    data: StoredConversation,
+  ): Promise<void> {
+    await this.redis.set(this.redisKey(conversationId), data, CONVERSATION_TTL_SECONDS);
   }
 }

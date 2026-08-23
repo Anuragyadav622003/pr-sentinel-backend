@@ -57,7 +57,8 @@ export const ModelName = {
   PullRequest: 'PullRequest',
   PrFile: 'PrFile',
   Review: 'Review',
-  ReviewComment: 'ReviewComment'
+  ReviewComment: 'ReviewComment',
+  UserLlmConfig: 'UserLlmConfig'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -84,7 +85,8 @@ export const UserScalarFieldEnum = {
   password: 'password',
   avatarUrl: 'avatarUrl',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  llmMode: 'llmMode'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -182,6 +184,20 @@ export const ReviewCommentScalarFieldEnum = {
 } as const
 
 export type ReviewCommentScalarFieldEnum = (typeof ReviewCommentScalarFieldEnum)[keyof typeof ReviewCommentScalarFieldEnum]
+
+
+export const UserLlmConfigScalarFieldEnum = {
+  id: 'id',
+  provider: 'provider',
+  encryptedApiKey: 'encryptedApiKey',
+  model: 'model',
+  isActive: 'isActive',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserLlmConfigScalarFieldEnum = (typeof UserLlmConfigScalarFieldEnum)[keyof typeof UserLlmConfigScalarFieldEnum]
 
 
 export const SortOrder = {

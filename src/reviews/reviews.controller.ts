@@ -23,12 +23,6 @@ type AuthedRequest = Request & { user: AuthenticatedUser };
 export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
-  // ─── GET /api/reviews ─────────────────────────────────────────────────────
-  //
-  // Returns all reviews for the authenticated user's repositories,
-  // ordered by most-recently created. Each review includes a lightweight
-  // comments projection (id + severity) so the list view can show counts.
-
   @Get()
   async list(@Req() req: AuthedRequest) {
     const reviews = await this.reviewsService.findAllForUser(req.user.id);
@@ -48,11 +42,6 @@ export class ReviewsController {
       updatedAt: r.updatedAt.toISOString(),
     }));
   }
-
-  // ─── GET /api/reviews/pull-request/:pullRequestId ─────────────────────────
-  //
-  // IMPORTANT: this route MUST be registered before ":id" to prevent NestJS
-  // from treating "pull-request" as a dynamic segment value.
 
   @Get('pull-request/:pullRequestId')
   async getByPullRequest(
@@ -90,8 +79,6 @@ export class ReviewsController {
     };
   }
 
-  // ─── GET /api/reviews/:id ─────────────────────────────────────────────────
-
   @Get(':id')
   async get(@Param('id') id: string, @Req() req: AuthedRequest) {
     const review = await this.reviewsService.findByIdForUser(id, req.user.id);
@@ -122,8 +109,6 @@ export class ReviewsController {
     };
   }
 
-  // ─── POST /api/reviews/:id/retry ──────────────────────────────────────────
-
   @Post(':id/retry')
   @HttpCode(HttpStatus.OK)
   async retry(@Param('id') id: string, @Req() req: AuthedRequest) {
@@ -142,16 +127,6 @@ export class ReviewsController {
     };
   }
 
-  // ─── POST /api/reviews/:id/chat ───────────────────────────────────────────
-  //
-  // Send a user message about a specific review and receive an AI reply.
-  //
-  // Request body:  { message: string, conversationId?: string }
-  // Response body: { message: string, conversationId: string }
-  //
-  // The conversationId is created on the first turn and must be echoed back by
-  // the client on subsequent turns to maintain conversation history.
-
   @Post(':id/chat')
   @HttpCode(HttpStatus.OK)
   async chat(
@@ -166,6 +141,6 @@ export class ReviewsController {
       body.conversationId,
     );
 
-    return result; // { message: string, conversationId: string }
+    return result;
   }
 }

@@ -4,7 +4,7 @@ export class ChatReviewDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(4000)
-  message: string;
+  message!: string;
 
   /**
    * Optional conversation ID to continue an existing thread.

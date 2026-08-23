@@ -35,6 +35,19 @@ enum Severity {
   CRITICAL
 }
 
+
+enum LlmProvider {
+  OPENROUTER
+  OPENAI
+  GEMINI
+  ANTHROPIC
+}
+
+enum LlmMode {
+  FREE
+  BYOK
+}
+
 model User {
   id            String   @id @default(uuid())
   githubId      String?  @unique
@@ -47,6 +60,9 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  llmMode    LlmMode          @default(FREE)
+  llmConfigs UserLlmConfig[]
 }
 
 model Installation {
@@ -174,4 +190,22 @@ model ReviewComment {
   createdAt DateTime @default(now())
 
   @@index([reviewId])
+}
+
+
+
+model UserLlmConfig {
+  id              String      @id @default(uuid())
+  provider        LlmProvider
+  encryptedApiKey String
+  model           String
+  isActive        Boolean     @default(true)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, provider])
 }

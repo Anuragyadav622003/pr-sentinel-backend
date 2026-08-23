@@ -33,6 +33,7 @@ export type UserMinAggregateOutputType = {
   avatarUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  llmMode: $Enums.LlmMode | null
 }
 
 export type UserMaxAggregateOutputType = {
@@ -44,6 +45,7 @@ export type UserMaxAggregateOutputType = {
   avatarUrl: string | null
   createdAt: Date | null
   updatedAt: Date | null
+  llmMode: $Enums.LlmMode | null
 }
 
 export type UserCountAggregateOutputType = {
@@ -55,6 +57,7 @@ export type UserCountAggregateOutputType = {
   avatarUrl: number
   createdAt: number
   updatedAt: number
+  llmMode: number
   _all: number
 }
 
@@ -68,6 +71,7 @@ export type UserMinAggregateInputType = {
   avatarUrl?: true
   createdAt?: true
   updatedAt?: true
+  llmMode?: true
 }
 
 export type UserMaxAggregateInputType = {
@@ -79,6 +83,7 @@ export type UserMaxAggregateInputType = {
   avatarUrl?: true
   createdAt?: true
   updatedAt?: true
+  llmMode?: true
 }
 
 export type UserCountAggregateInputType = {
@@ -90,6 +95,7 @@ export type UserCountAggregateInputType = {
   avatarUrl?: true
   createdAt?: true
   updatedAt?: true
+  llmMode?: true
   _all?: true
 }
 
@@ -174,6 +180,7 @@ export type UserGroupByOutputType = {
   avatarUrl: string | null
   createdAt: Date
   updatedAt: Date
+  llmMode: $Enums.LlmMode
   _count: UserCountAggregateOutputType | null
   _min: UserMinAggregateOutputType | null
   _max: UserMaxAggregateOutputType | null
@@ -206,7 +213,9 @@ export type UserWhereInput = {
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  llmMode?: Prisma.EnumLlmModeFilter<"User"> | $Enums.LlmMode
   installations?: Prisma.InstallationListRelationFilter
+  llmConfigs?: Prisma.UserLlmConfigListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -218,7 +227,9 @@ export type UserOrderByWithRelationInput = {
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  llmMode?: Prisma.SortOrder
   installations?: Prisma.InstallationOrderByRelationAggregateInput
+  llmConfigs?: Prisma.UserLlmConfigOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -233,7 +244,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
+  llmMode?: Prisma.EnumLlmModeFilter<"User"> | $Enums.LlmMode
   installations?: Prisma.InstallationListRelationFilter
+  llmConfigs?: Prisma.UserLlmConfigListRelationFilter
 }, "id" | "githubId" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -245,6 +258,7 @@ export type UserOrderByWithAggregationInput = {
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  llmMode?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
   _max?: Prisma.UserMaxOrderByAggregateInput
   _min?: Prisma.UserMinOrderByAggregateInput
@@ -262,6 +276,7 @@ export type UserScalarWhereWithAggregatesInput = {
   avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
+  llmMode?: Prisma.EnumLlmModeWithAggregatesFilter<"User"> | $Enums.LlmMode
 }
 
 export type UserCreateInput = {
@@ -273,7 +288,9 @@ export type UserCreateInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  llmMode?: $Enums.LlmMode
   installations?: Prisma.InstallationCreateNestedManyWithoutUserInput
+  llmConfigs?: Prisma.UserLlmConfigCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -285,7 +302,9 @@ export type UserUncheckedCreateInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  llmMode?: $Enums.LlmMode
   installations?: Prisma.InstallationUncheckedCreateNestedManyWithoutUserInput
+  llmConfigs?: Prisma.UserLlmConfigUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -297,7 +316,9 @@ export type UserUpdateInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  llmMode?: Prisma.EnumLlmModeFieldUpdateOperationsInput | $Enums.LlmMode
   installations?: Prisma.InstallationUpdateManyWithoutUserNestedInput
+  llmConfigs?: Prisma.UserLlmConfigUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -309,7 +330,9 @@ export type UserUncheckedUpdateInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  llmMode?: Prisma.EnumLlmModeFieldUpdateOperationsInput | $Enums.LlmMode
   installations?: Prisma.InstallationUncheckedUpdateManyWithoutUserNestedInput
+  llmConfigs?: Prisma.UserLlmConfigUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -321,6 +344,7 @@ export type UserCreateManyInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  llmMode?: $Enums.LlmMode
 }
 
 export type UserUpdateManyMutationInput = {
@@ -332,6 +356,7 @@ export type UserUpdateManyMutationInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  llmMode?: Prisma.EnumLlmModeFieldUpdateOperationsInput | $Enums.LlmMode
 }
 
 export type UserUncheckedUpdateManyInput = {
@@ -343,6 +368,7 @@ export type UserUncheckedUpdateManyInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  llmMode?: Prisma.EnumLlmModeFieldUpdateOperationsInput | $Enums.LlmMode
 }
 
 export type UserCountOrderByAggregateInput = {
@@ -354,6 +380,7 @@ export type UserCountOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  llmMode?: Prisma.SortOrder
 }
 
 export type UserMaxOrderByAggregateInput = {
@@ -365,6 +392,7 @@ export type UserMaxOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  llmMode?: Prisma.SortOrder
 }
 
 export type UserMinOrderByAggregateInput = {
@@ -376,11 +404,17 @@ export type UserMinOrderByAggregateInput = {
   avatarUrl?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  llmMode?: Prisma.SortOrder
 }
 
 export type UserNullableScalarRelationFilter = {
   is?: Prisma.UserWhereInput | null
   isNot?: Prisma.UserWhereInput | null
+}
+
+export type UserScalarRelationFilter = {
+  is?: Prisma.UserWhereInput
+  isNot?: Prisma.UserWhereInput
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -393,6 +427,10 @@ export type NullableStringFieldUpdateOperationsInput = {
 
 export type DateTimeFieldUpdateOperationsInput = {
   set?: Date | string
+}
+
+export type EnumLlmModeFieldUpdateOperationsInput = {
+  set?: $Enums.LlmMode
 }
 
 export type UserCreateNestedOneWithoutInstallationsInput = {
@@ -411,6 +449,20 @@ export type UserUpdateOneWithoutInstallationsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInstallationsInput, Prisma.UserUpdateWithoutInstallationsInput>, Prisma.UserUncheckedUpdateWithoutInstallationsInput>
 }
 
+export type UserCreateNestedOneWithoutLlmConfigsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLlmConfigsInput, Prisma.UserUncheckedCreateWithoutLlmConfigsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLlmConfigsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutLlmConfigsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutLlmConfigsInput, Prisma.UserUncheckedCreateWithoutLlmConfigsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutLlmConfigsInput
+  upsert?: Prisma.UserUpsertWithoutLlmConfigsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutLlmConfigsInput, Prisma.UserUpdateWithoutLlmConfigsInput>, Prisma.UserUncheckedUpdateWithoutLlmConfigsInput>
+}
+
 export type UserCreateWithoutInstallationsInput = {
   id?: string
   githubId?: string | null
@@ -420,6 +472,8 @@ export type UserCreateWithoutInstallationsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  llmMode?: $Enums.LlmMode
+  llmConfigs?: Prisma.UserLlmConfigCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutInstallationsInput = {
@@ -431,6 +485,8 @@ export type UserUncheckedCreateWithoutInstallationsInput = {
   avatarUrl?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  llmMode?: $Enums.LlmMode
+  llmConfigs?: Prisma.UserLlmConfigUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutInstallationsInput = {
@@ -458,6 +514,8 @@ export type UserUpdateWithoutInstallationsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  llmMode?: Prisma.EnumLlmModeFieldUpdateOperationsInput | $Enums.LlmMode
+  llmConfigs?: Prisma.UserLlmConfigUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInstallationsInput = {
@@ -469,6 +527,76 @@ export type UserUncheckedUpdateWithoutInstallationsInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  llmMode?: Prisma.EnumLlmModeFieldUpdateOperationsInput | $Enums.LlmMode
+  llmConfigs?: Prisma.UserLlmConfigUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutLlmConfigsInput = {
+  id?: string
+  githubId?: string | null
+  githubLogin?: string | null
+  email?: string | null
+  password?: string | null
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  llmMode?: $Enums.LlmMode
+  installations?: Prisma.InstallationCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutLlmConfigsInput = {
+  id?: string
+  githubId?: string | null
+  githubLogin?: string | null
+  email?: string | null
+  password?: string | null
+  avatarUrl?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  llmMode?: $Enums.LlmMode
+  installations?: Prisma.InstallationUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutLlmConfigsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutLlmConfigsInput, Prisma.UserUncheckedCreateWithoutLlmConfigsInput>
+}
+
+export type UserUpsertWithoutLlmConfigsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutLlmConfigsInput, Prisma.UserUncheckedUpdateWithoutLlmConfigsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutLlmConfigsInput, Prisma.UserUncheckedCreateWithoutLlmConfigsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutLlmConfigsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutLlmConfigsInput, Prisma.UserUncheckedUpdateWithoutLlmConfigsInput>
+}
+
+export type UserUpdateWithoutLlmConfigsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  githubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  githubLogin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  llmMode?: Prisma.EnumLlmModeFieldUpdateOperationsInput | $Enums.LlmMode
+  installations?: Prisma.InstallationUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutLlmConfigsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  githubId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  githubLogin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  llmMode?: Prisma.EnumLlmModeFieldUpdateOperationsInput | $Enums.LlmMode
+  installations?: Prisma.InstallationUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -478,10 +606,12 @@ export type UserUncheckedUpdateWithoutInstallationsInput = {
 
 export type UserCountOutputType = {
   installations: number
+  llmConfigs: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   installations?: boolean | UserCountOutputTypeCountInstallationsArgs
+  llmConfigs?: boolean | UserCountOutputTypeCountLlmConfigsArgs
 }
 
 /**
@@ -501,6 +631,13 @@ export type UserCountOutputTypeCountInstallationsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.InstallationWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountLlmConfigsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserLlmConfigWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -511,7 +648,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  llmMode?: boolean
   installations?: boolean | Prisma.User$installationsArgs<ExtArgs>
+  llmConfigs?: boolean | Prisma.User$llmConfigsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -524,6 +663,7 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  llmMode?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -535,6 +675,7 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  llmMode?: boolean
 }, ExtArgs["result"]["user"]>
 
 export type UserSelectScalar = {
@@ -546,11 +687,13 @@ export type UserSelectScalar = {
   avatarUrl?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  llmMode?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "githubId" | "githubLogin" | "email" | "password" | "avatarUrl" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "githubId" | "githubLogin" | "email" | "password" | "avatarUrl" | "createdAt" | "updatedAt" | "llmMode", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   installations?: boolean | Prisma.User$installationsArgs<ExtArgs>
+  llmConfigs?: boolean | Prisma.User$llmConfigsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -560,6 +703,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "User"
   objects: {
     installations: Prisma.$InstallationPayload<ExtArgs>[]
+    llmConfigs: Prisma.$UserLlmConfigPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -570,6 +714,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     avatarUrl: string | null
     createdAt: Date
     updatedAt: Date
+    llmMode: $Enums.LlmMode
   }, ExtArgs["result"]["user"]>
   composites: {}
 }
@@ -965,6 +1110,7 @@ readonly fields: UserFieldRefs;
 export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   installations<T extends Prisma.User$installationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$installationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InstallationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  llmConfigs<T extends Prisma.User$llmConfigsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$llmConfigsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserLlmConfigPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1002,6 +1148,7 @@ export interface UserFieldRefs {
   readonly avatarUrl: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly llmMode: Prisma.FieldRef<"User", 'LlmMode'>
 }
     
 
@@ -1416,6 +1563,30 @@ export type User$installationsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.InstallationScalarFieldEnum | Prisma.InstallationScalarFieldEnum[]
+}
+
+/**
+ * User.llmConfigs
+ */
+export type User$llmConfigsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserLlmConfig
+   */
+  select?: Prisma.UserLlmConfigSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserLlmConfig
+   */
+  omit?: Prisma.UserLlmConfigOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserLlmConfigInclude<ExtArgs> | null
+  where?: Prisma.UserLlmConfigWhereInput
+  orderBy?: Prisma.UserLlmConfigOrderByWithRelationInput | Prisma.UserLlmConfigOrderByWithRelationInput[]
+  cursor?: Prisma.UserLlmConfigWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserLlmConfigScalarFieldEnum | Prisma.UserLlmConfigScalarFieldEnum[]
 }
 
 /**

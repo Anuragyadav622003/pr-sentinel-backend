@@ -403,7 +403,8 @@ export const ModelName = {
   PullRequest: 'PullRequest',
   PrFile: 'PrFile',
   Review: 'Review',
-  ReviewComment: 'ReviewComment'
+  ReviewComment: 'ReviewComment',
+  UserLlmConfig: 'UserLlmConfig'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -419,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "installation" | "repository" | "pullRequest" | "prFile" | "review" | "reviewComment"
+    modelProps: "user" | "installation" | "repository" | "pullRequest" | "prFile" | "review" | "reviewComment" | "userLlmConfig"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -941,6 +942,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    UserLlmConfig: {
+      payload: Prisma.$UserLlmConfigPayload<ExtArgs>
+      fields: Prisma.UserLlmConfigFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserLlmConfigFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLlmConfigPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserLlmConfigFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLlmConfigPayload>
+        }
+        findFirst: {
+          args: Prisma.UserLlmConfigFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLlmConfigPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserLlmConfigFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLlmConfigPayload>
+        }
+        findMany: {
+          args: Prisma.UserLlmConfigFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLlmConfigPayload>[]
+        }
+        create: {
+          args: Prisma.UserLlmConfigCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLlmConfigPayload>
+        }
+        createMany: {
+          args: Prisma.UserLlmConfigCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserLlmConfigCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLlmConfigPayload>[]
+        }
+        delete: {
+          args: Prisma.UserLlmConfigDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLlmConfigPayload>
+        }
+        update: {
+          args: Prisma.UserLlmConfigUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLlmConfigPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserLlmConfigDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserLlmConfigUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserLlmConfigUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLlmConfigPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserLlmConfigUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserLlmConfigPayload>
+        }
+        aggregate: {
+          args: Prisma.UserLlmConfigAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserLlmConfig>
+        }
+        groupBy: {
+          args: Prisma.UserLlmConfigGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserLlmConfigGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserLlmConfigCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserLlmConfigCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -988,7 +1063,8 @@ export const UserScalarFieldEnum = {
   password: 'password',
   avatarUrl: 'avatarUrl',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  llmMode: 'llmMode'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -1088,6 +1164,20 @@ export const ReviewCommentScalarFieldEnum = {
 export type ReviewCommentScalarFieldEnum = (typeof ReviewCommentScalarFieldEnum)[keyof typeof ReviewCommentScalarFieldEnum]
 
 
+export const UserLlmConfigScalarFieldEnum = {
+  id: 'id',
+  provider: 'provider',
+  encryptedApiKey: 'encryptedApiKey',
+  model: 'model',
+  isActive: 'isActive',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserLlmConfigScalarFieldEnum = (typeof UserLlmConfigScalarFieldEnum)[keyof typeof UserLlmConfigScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1143,6 +1233,20 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'DateTime[]'
  */
 export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LlmMode'
+ */
+export type EnumLlmModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LlmMode'>
+    
+
+
+/**
+ * Reference to a field of type 'LlmMode[]'
+ */
+export type ListEnumLlmModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LlmMode[]'>
     
 
 
@@ -1234,6 +1338,20 @@ export type EnumSeverityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
  * Reference to a field of type 'Severity[]'
  */
 export type ListEnumSeverityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Severity[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LlmProvider'
+ */
+export type EnumLlmProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LlmProvider'>
+    
+
+
+/**
+ * Reference to a field of type 'LlmProvider[]'
+ */
+export type ListEnumLlmProviderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LlmProvider[]'>
     
 
 
@@ -1408,6 +1526,7 @@ export type GlobalOmitConfig = {
   prFile?: Prisma.PrFileOmit
   review?: Prisma.ReviewOmit
   reviewComment?: Prisma.ReviewCommentOmit
+  userLlmConfig?: Prisma.UserLlmConfigOmit
 }
 
 /* Types for Logging */

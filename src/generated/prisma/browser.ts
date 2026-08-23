@@ -52,3 +52,8 @@ export type Review = Prisma.ReviewModel
  * 
  */
 export type ReviewComment = Prisma.ReviewCommentModel
+/**
+ * Model UserLlmConfig
+ * 
+ */
+export type UserLlmConfig = Prisma.UserLlmConfigModel

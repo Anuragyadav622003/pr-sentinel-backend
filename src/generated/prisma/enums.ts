@@ -46,3 +46,21 @@ export const Severity = {
 } as const
 
 export type Severity = (typeof Severity)[keyof typeof Severity]
+
+
+export const LlmProvider = {
+  OPENROUTER: 'OPENROUTER',
+  OPENAI: 'OPENAI',
+  GEMINI: 'GEMINI',
+  ANTHROPIC: 'ANTHROPIC'
+} as const
+
+export type LlmProvider = (typeof LlmProvider)[keyof typeof LlmProvider]
+
+
+export const LlmMode = {
+  FREE: 'FREE',
+  BYOK: 'BYOK'
+} as const
+
+export type LlmMode = (typeof LlmMode)[keyof typeof LlmMode]
