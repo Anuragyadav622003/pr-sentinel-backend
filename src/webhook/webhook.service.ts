@@ -1,4 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { GithubService } from '../github/github.service';
 import { RepositoryService } from 'src/repository/repository.service';
 import { PullRequestService } from 'src/pull-request/pull-request.service';
@@ -10,6 +12,7 @@ import {
   InstallationRepositoriesWebhookPayload,
   RawWebhookHeaders,
 } from './types/github-webhook.types';
+import type { GenerateReviewJobData } from 'src/reviews/processors/review.processor';
 
 /** Actions on pull_request events that should trigger a code review. */
 const PR_TRIGGER_ACTIONS = new Set<PullRequestTriggerAction>([
@@ -26,6 +29,7 @@ export class WebhookService {
     private readonly githubService: GithubService,
     private readonly repositoryService: RepositoryService,
     private readonly pullRequestService: PullRequestService,
+    @InjectQueue('review') private readonly reviewQueue: Queue<GenerateReviewJobData>,
   ) {}
 
   // ─── Entry point ──────────────────────────────────────────────────────────
@@ -152,8 +156,9 @@ export class WebhookService {
       };
     }
 
-    // Fetch changed files and persist PrFile rows.-
+    // Fetch changed files and persist PrFile rows.
     let filesCount = 0;
+    let filesFailed = false;
     try {
       const token =
         await this.githubService.getInstallationToken(installationId);
@@ -170,10 +175,40 @@ export class WebhookService {
       const message =
         error instanceof Error ? error.message : String(error);
       this.logger.warn(`Failed to fetch/save PR files: ${message}`);
+      filesFailed = true;
       await this.pullRequestService.markFailed(
         prRecord.id,
         `File fetch failed: ${message}`,
       );
+    }
+
+    // Enqueue the AI review job only when files were fetched successfully.
+    // The installation may not be linked to a user yet (userId null) — in that
+    // case we cannot run a user-scoped review and skip enqueuing.
+    if (!filesFailed) {
+      const installationRecord =
+        await this.repositoryService.findInstallationByGithubId(installationId);
+      const userId: string | null = installationRecord?.userId ?? null;
+
+      if (userId) {
+        await this.reviewQueue.add(
+          'generate-review',
+          { pullRequestId: prRecord.id, userId },
+          {
+            attempts: 3,
+            backoff: { type: 'exponential', delay: 5000 },
+            removeOnComplete: 100,
+            removeOnFail: 200,
+          },
+        );
+        this.logger.log(
+          `Enqueued review job for PR ${prRecord.id} (user ${userId})`,
+        );
+      } else {
+        this.logger.warn(
+          `Skipping review job for PR ${prRecord.id} — installation ${installationId} has no linked user yet`,
+        );
+      }
     }
 
     return {

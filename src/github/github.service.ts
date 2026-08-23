@@ -215,4 +215,76 @@ export class GithubService implements OnModuleInit {
     );
     return response.data;
   }
+
+  /**
+   * Build a unified diff string for a pull request by concatenating the
+   * patch hunks from each changed file.  Uses the installation access token.
+   */
+  async getPullRequestDiff(
+    owner: string,
+    repo: string,
+    pullNumber: number,
+    installationId: number,
+  ): Promise<string> {
+    const token = await this.getInstallationToken(installationId);
+    const files: Array<{ filename: string; patch?: string }> =
+      await this.getPullRequestFiles(owner, repo, pullNumber, token);
+
+    const parts: string[] = [];
+    for (const file of files) {
+      if (file.patch) {
+        parts.push(`--- a/${file.filename}\n+++ b/${file.filename}\n${file.patch}`);
+      }
+    }
+
+    this.logger.log(
+      `Built diff for ${owner}/${repo}#${pullNumber}: ${parts.length} file(s) with patches`,
+    );
+    return parts.join('\n\n');
+  }
+
+  /**
+   * Submit a pull-request review (with optional inline comments) via the
+   * GitHub Reviews API.  Returns the GitHub review ID.
+   */
+  async createPullRequestReview(params: {
+    owner: string;
+    repo: string;
+    prNumber: number;
+    installationId: number;
+    body: string;
+    comments?: Array<{ path: string; line: number; body: string }>;
+  }): Promise<number> {
+    const { owner, repo, prNumber, installationId, body, comments = [] } = params;
+    const token = await this.getInstallationToken(installationId);
+
+    const url = `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}/reviews`;
+
+    const response = await axios.post(
+      url,
+      {
+        body,
+        event: 'COMMENT',
+        comments: comments.map((c) => ({
+          path: c.path,
+          line: c.line,
+          body: c.body,
+          side: 'RIGHT',
+        })),
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.github+json',
+          'X-GitHub-Api-Version': '2022-11-28',
+        },
+      },
+    );
+
+    const reviewId: number = response.data.id;
+    this.logger.log(
+      `Created GitHub review ${reviewId} for ${owner}/${repo}#${prNumber}`,
+    );
+    return reviewId;
+  }
 }

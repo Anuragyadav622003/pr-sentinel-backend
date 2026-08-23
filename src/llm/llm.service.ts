@@ -1,60 +1,56 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import OpenAI from 'openai';
-
-export interface LlmMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-}
-
-export interface LlmChatOptions {
-  messages: LlmMessage[];
-  /** Max tokens to generate. Defaults to 1500. */
-  maxTokens?: number;
-}
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { LlmFactory } from './llm.factory';
+import { LlmConfigService } from './services/llm-config.service';
+import { FreeQuotaService } from './services/free-quota.service';
+import { LlmProviderType,LlmReviewResponse,LlmMessage, LlmMode } from './types/llm.types';
 
 @Injectable()
-export class LlmService implements OnModuleInit {
-  private readonly logger = new Logger(LlmService.name);
-  private client: OpenAI;
-  private model: string;
+export class LlmService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly factory: LlmFactory,
+    private readonly llmConfig: LlmConfigService,
+    private readonly freeQuota: FreeQuotaService,
+  ) {}
 
-  constructor(private readonly config: ConfigService) {}
-
-  onModuleInit() {
-    const apiKey = this.config.get<string>('OPENAI_API_KEY');
-    if (!apiKey) {
-      this.logger.warn(
-        'OPENAI_API_KEY is not set — AI chat will be unavailable.',
-      );
-    }
-    this.model = this.config.get<string>('OPENAI_MODEL') ?? 'gpt-4o-mini';
-    this.client = new OpenAI({ apiKey: apiKey ?? 'not-configured' });
+  /** Single-turn: used by the review-generation worker. */
+  async generateReview(
+    userId: string,
+    systemPrompt: string,
+    userPrompt: string,
+  ): Promise<LlmReviewResponse> {
+    const { apiKey, model } = await this.resolveKeyAndModel(userId);
+    const provider = this.factory.getProvider(LlmProviderType.OPENROUTER);
+    return provider.review({ apiKey, model, systemPrompt, userPrompt });
   }
 
-  /**
-   * Send a conversation to the LLM and return the assistant reply text.
-   * Throws if the API key is missing or the API call fails.
-   */
-  async chat(options: LlmChatOptions): Promise<string> {
-    const apiKey = this.config.get<string>('OPENAI_API_KEY');
-    if (!apiKey) {
-      throw new Error(
-        'AI chat is not configured. Please set OPENAI_API_KEY on the server.',
+  /** Multi-turn: used by ReviewsService.chat() for "ask about this review". */
+  async chat(userId: string, messages: LlmMessage[]): Promise<string> {
+    const { apiKey, model } = await this.resolveKeyAndModel(userId);
+    const provider = this.factory.getProvider(LlmProviderType.OPENROUTER);
+    const result = await provider.chat({ apiKey, model, messages });
+    return result.content;
+  }
+
+  private async resolveKeyAndModel(
+    userId: string,
+  ): Promise<{ apiKey: string; model: string }> {
+    const user = await this.prisma.user.findUniqueOrThrow({ where: { id: userId } });
+
+    if (user.llmMode === LlmMode.BYOK) {
+      return this.llmConfig.getDecryptedConfig(userId, LlmProviderType.OPENROUTER);
+    }
+
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    const model = process.env.OPENROUTER_DEFAULT_MODEL;
+    if (!apiKey || !model) {
+      throw new InternalServerErrorException(
+        'OPENROUTER_API_KEY / OPENROUTER_DEFAULT_MODEL not configured',
       );
     }
 
-    const response = await this.client.chat.completions.create({
-      model: this.model,
-      messages: options.messages,
-      max_tokens: options.maxTokens ?? 1500,
-      temperature: 0.3,
-    });
-
-    const text = response.choices[0]?.message?.content?.trim();
-    if (!text) {
-      throw new Error('The AI returned an empty response. Please try again.');
-    }
-    return text;
+    await this.freeQuota.consumeFreeReview(userId);
+    return { apiKey, model };
   }
 }

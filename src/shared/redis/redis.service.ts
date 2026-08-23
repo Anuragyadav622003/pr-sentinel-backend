@@ -5,7 +5,7 @@ import Redis from 'ioredis';
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RedisService.name);
-  private client: Redis;
+  private client!: Redis;
 
   constructor(private readonly configService: ConfigService) {}
 
@@ -47,6 +47,16 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     return this.client.ping();
   }
 
+  // redis.service.ts — add these methods
+/** Atomically increment a counter, returns the new value. */
+async incr(key: string): Promise<number> {
+  return this.client.incr(key);
+}
+
+/** Set a TTL (seconds) on an existing key. */
+async expire(key: string, ttlSeconds: number): Promise<void> {
+  await this.client.expire(key, ttlSeconds);
+}
   /**
    * Prefer REDIS_URL (Render injects this when Key Value is linked to the
    * web service). Fall back to REDIS_HOST/REDIS_PORT for local Docker dev.
