@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { AppController } from './app.controller';
 import { RedisService } from './shared/redis/redis.service';
@@ -17,13 +17,38 @@ import { WebhookModule } from './webhook/webhook.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    BullModule.forRoot({
-      connection: {
-        host: process.env.REDIS_HOST ?? 'localhost',
-        port: Number(process.env.REDIS_PORT ?? 6379),
-        password: process.env.REDIS_PASSWORD,
+     BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const redisUrl = configService.get<string>('REDIS_URL');
+
+        if (redisUrl) {
+          return {
+            connection: {
+              url: redisUrl,
+              family: 4,
+            },
+          };
+        }
+
+        return {
+          connection: {
+            host:
+              configService.get<string>('REDIS_HOST') ?? 'localhost',
+
+            port: Number(
+              configService.get<string>('REDIS_PORT') ?? 6379,
+            ),
+
+            password:
+              configService.get<string>('REDIS_PASSWORD') || undefined,
+
+            family: 4,
+          },
+        };
       },
     }),
+
     PrismaModule,
     AuthModule,
     GithubModule,
