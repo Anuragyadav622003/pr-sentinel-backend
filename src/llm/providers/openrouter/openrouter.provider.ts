@@ -35,7 +35,6 @@ export class OpenRouterProvider implements LlmProvider {
     try {
       const completion = await client.chat.completions.create({
         model: request.model,
-        tools: [{ type: "web_search" }],
         messages: request.messages.map((m) => ({
           role: m.role,
           content: m.content,
